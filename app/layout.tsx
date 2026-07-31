@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { Jua } from "next/font/google";
+import { Noto_Sans_KR } from "next/font/google";
 import "./globals.css";
 
-const jua = Jua({
-  weight: "400",
+const noto = Noto_Sans_KR({
+  weight: ["400", "500", "700"],
   subsets: ["latin"],
-  variable: "--font-jua",
+  variable: "--font-noto",
 });
 
 export const metadata: Metadata = {
@@ -15,12 +15,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ko" className={`${jua.variable} h-full`}>
-      <body className="min-h-full flex flex-col font-[family-name:var(--font-jua)]">
+    <html lang="ko" className={`${noto.variable} h-full`}>
+      <body className="min-h-full flex flex-col font-[family-name:var(--font-noto)]">
         {children}
       </body>
     </html>
