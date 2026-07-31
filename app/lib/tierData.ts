@@ -1,11 +1,9 @@
 export type Category =
   | "부동산"
-  | "아파트 브랜드 티어"
-  | "시공사 티어"
-  | "상권 티어"
-  | "학군 티어"
-  | "서울 집값 티어"
-  | "경제·재테크 TOP";
+  | "아파트 브랜드"
+  | "서울 집값"
+  | "경제·재테크"
+  | "댓글 핫픽";
 
 export type Region = "서울" | "경기" | "인천";
 
@@ -16,6 +14,7 @@ export interface RankedItem {
   label: string;
   tier: TierGrade;
   hook: string;
+  icon?: string;
 }
 
 export interface ClipSource {
@@ -24,6 +23,8 @@ export interface ClipSource {
 }
 
 export interface CategoryContent {
+  topicId: string;
+  topicTitle: string;
   headlines: string[];
   cardTag: string;
   cardTitle: string;
@@ -34,26 +35,25 @@ export interface CategoryContent {
   clipSources: ClipSource[];
   clipStrategy: string;
   defaultCount: number;
+  mode: "ranking" | "comment-pick";
 }
 
 export const CATEGORIES: Category[] = [
   "부동산",
-  "아파트 브랜드 티어",
-  "시공사 티어",
-  "상권 티어",
-  "학군 티어",
-  "서울 집값 티어",
-  "경제·재테크 TOP",
+  "아파트 브랜드",
+  "서울 집값",
+  "경제·재테크",
+  "댓글 핫픽",
 ];
 
 export const REGIONS: Region[] = ["서울", "경기", "인천"];
 
 export const TIER_COLORS: Record<TierGrade, string> = {
-  S: "#f97316",
-  A: "#22d3ee",
-  B: "#a3e635",
-  C: "#94a3b8",
-  D: "#64748b",
+  S: "#FF6B6B",
+  A: "#FFB347",
+  B: "#77DD77",
+  C: "#A8D8EA",
+  D: "#C9B1FF",
 };
 
 export const TIER_EMOJI: Record<TierGrade, string> = {
@@ -61,5 +61,7 @@ export const TIER_EMOJI: Record<TierGrade, string> = {
   A: "🥇",
   B: "🥈",
   C: "🥉",
-  D: "📘",
+  D: "💫",
 };
+
+export const RANK_STICKERS = ["🥇", "🥈", "🥉", "4️⃣", "5️⃣"];
