@@ -5,25 +5,23 @@ export type Category =
   | "아파트 브랜드"
   | "미분양·공급";
 
-/** A=짤·밈  B=swipe  C=달력  D=데이터대조  tier=순위(20~40%만) */
-export type CardTemplateType =
-  | "meme"
-  | "swipe"
-  | "calendar"
-  | "data-compare"
-  | "tier";
+export type ContentFormat = "single" | "carousel";
 
-export interface RankedItem {
-  rank: number;
-  label: string;
-  hook: string;
-  tier?: "S" | "A" | "B" | "C";
-}
+export type SlideLayout =
+  | "hook"
+  | "story"
+  | "insight"
+  | "calendar"
+  | "chart"
+  | "ranking"
+  | "policy"
+  | "unsold";
 
 export interface CalendarEvent {
   day: number;
+  endDay?: number;
   label: string;
-  tag?: string;
+  type?: "tax" | "policy" | "supply" | "rate" | "general";
 }
 
 export interface ChartPoint {
@@ -31,76 +29,59 @@ export interface ChartPoint {
   value: number;
 }
 
-export interface DataComparePayload {
-  regionTag: string;
+export interface RankingRow {
+  rank: number;
+  label: string;
+  sub?: string;
+  value: string;
+  highlight?: boolean;
+}
+
+export interface PolicyPerson {
+  name: string;
+  role: string;
+  stat: string;
+  statLabel: string;
+}
+
+export interface WinnerLoser {
+  side: "winner" | "loser" | "neutral";
+  label: string;
+  reason: string;
+}
+
+export interface CardSlide {
+  layout: SlideLayout;
   headline: string;
-  insight: string;
-  priceSeries: ChartPoint[];
-  supplySeries: ChartPoint[];
+  subheadline?: string;
+  body?: string[];
+  highlight?: string;
+  source?: string;
+  slideIndex?: number;
+  totalSlides?: number;
+  accent?: "dark" | "light" | "green";
+  events?: CalendarEvent[];
+  month?: number;
+  year?: number;
+  priceSeries?: ChartPoint[];
+  supplySeries?: ChartPoint[];
   priceLabel?: string;
   supplyLabel?: string;
+  conclusion?: string;
+  winnersLosers?: WinnerLoser[];
+  rows?: RankingRow[];
+  people?: PolicyPerson[];
+  region?: string;
+  topRegions?: { name: string; count: number; rate: string }[];
 }
-
-export const COMPARE_TOPIC_IDS = [
-  "gangnam-vs-mapo",
-  "seoul-supply-cliff",
-  "mapo-yongsan-seongdong",
-  "jeonse-vs-maemae",
-  "redevelop-vs-new",
-  "gyeonggi-vs-seoul-outer",
-  "changwon-supply",
-] as const;
-
-export type CompareTopicId = (typeof COMPARE_TOPIC_IDS)[number];
-
-export interface MemePayload {
-  categoryTag: string;
-  punchline: string;
-  memeKey: "frog" | "cat" | "office";
-}
-
-export interface SwipePayload {
-  question: string;
-  accent: "cream" | "green" | "charcoal";
-}
-
-export interface CalendarPayload {
-  month: number;
-  year: number;
-  title: string;
-  events: CalendarEvent[];
-}
-
-export interface TierPayload {
-  tag: string;
-  title: string;
-  subtitle: string;
-  items: RankedItem[];
-}
-
-export interface UnsoldPayload {
-  region: string;
-  title: string;
-  topRegions: { name: string; count: number; rate: string }[];
-  insight: string;
-}
-
-export type CardPayload =
-  | { template: "meme"; data: MemePayload }
-  | { template: "swipe"; data: SwipePayload }
-  | { template: "calendar"; data: CalendarPayload }
-  | { template: "data-compare"; data: DataComparePayload }
-  | { template: "tier"; data: TierPayload }
-  | { template: "unsold"; data: UnsoldPayload };
 
 export interface GeneratedContent {
   topicId: string;
-  topicTitle: string;
-  template: CardTemplateType | "unsold";
-  payload: CardPayload;
+  summary: string;
+  format: ContentFormat;
+  slides: CardSlide[];
   caption: string;
   hashtags: string[];
-  headlines: string[];
 }
 
 export const CATEGORIES: Category[] = [
@@ -120,12 +101,32 @@ export const UNSOLD_REGIONS = [
   "대구",
 ] as const;
 
+export const COMPARE_TOPIC_IDS = [
+  "gangnam-vs-mapo",
+  "seoul-supply-cliff",
+  "mapo-yongsan-seongdong",
+  "jeonse-vs-maemae",
+  "redevelop-vs-new",
+  "gyeonggi-vs-seoul-outer",
+  "changwon-supply",
+] as const;
+
+export type CompareTopicId = (typeof COMPARE_TOPIC_IDS)[number];
+
 export const BRAND_HANDLE = "@quickline_mr";
 
-export const TEMPLATE_LABELS: Record<CardTemplateType, string> = {
-  meme: "Type A · 공감",
-  swipe: "Type B · Swipe",
-  calendar: "Type C · 달력",
-  "data-compare": "Type D · 데이터",
-  tier: "Tier · 순위",
+export const FORMAT_LABELS: Record<ContentFormat, string> = {
+  single: "한 장 요약",
+  carousel: "스토리 · 캐러셀",
+};
+
+export const LAYOUT_LABELS: Record<SlideLayout, string> = {
+  hook: "후킹",
+  story: "전개",
+  insight: "인사이트",
+  calendar: "달력",
+  chart: "데이터",
+  ranking: "순위",
+  policy: "정책",
+  unsold: "미분양",
 };

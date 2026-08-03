@@ -1,18 +1,17 @@
-import type { ChartPoint, CompareTopicId } from "./cardTypes";
+import type { ChartPoint, CompareTopicId, WinnerLoser } from "./cardTypes";
 
 export interface CompareTopic {
   id: CompareTopicId;
-  /** 주제 제안 목록에 노출되는 굵직한 타이틀 */
   title: string;
-  /** 카드 상단 태그 */
   regionTag: string;
-  /** 카드 내 헤드라인 */
   headline: string;
   priceSeries: ChartPoint[];
   supplySeries: ChartPoint[];
   priceLabel: string;
   supplyLabel: string;
   insight: string;
+  conclusion: string;
+  winnersLosers?: WinnerLoser[];
 }
 
 export const COMPARE_TOPICS: CompareTopic[] = [
@@ -38,6 +37,12 @@ export const COMPARE_TOPICS: CompareTopic[] = [
       { label: "24.03", value: 48 },
     ],
     insight: "마포 입주 절벽 구간과 강남 가격 반등 타이밍이 겹칩니다.",
+    conclusion: "강남은 수요·학군 프리미엄, 마포는 입주 절벽 후 반등 — 같은 전세라도 체감 다른 이유",
+    winnersLosers: [
+      { side: "winner", label: "강남·서초 거주", reason: "수요·학군 방어" },
+      { side: "loser", label: "마포 대량 입주 직후", reason: "공급 압력" },
+      { side: "neutral", label: "입주 절벽 이후 마포", reason: "반등 구간" },
+    ],
   },
   {
     id: "seoul-supply-cliff",
@@ -61,6 +66,11 @@ export const COMPARE_TOPICS: CompareTopic[] = [
       { label: "22.03", value: 48 },
     ],
     insight: "서울은 입주 절벽 구간과 가격 랠리 타이밍이 뚜렷하게 겹칩니다.",
+    conclusion: "입주물량 48(지수)까지 떨어진 22.03, 매매지수 122로 정점 — 공급↓ 가격↑ 패턴",
+    winnersLosers: [
+      { side: "winner", label: "입주 절벽 전 매수", reason: "공급 부족 프리미엄" },
+      { side: "loser", label: "대량 입주 직후 매수", reason: "공급 압력·조정" },
+    ],
   },
   {
     id: "mapo-yongsan-seongdong",
@@ -84,6 +94,7 @@ export const COMPARE_TOPICS: CompareTopic[] = [
       { label: "25.01", value: 44 },
     ],
     insight: "재건축·신규 단지 공급 타이밍마다 구별 상승 폭이 갈립니다.",
+    conclusion: "마포 입주↓ vs 용산·성동 재건축 기대 = 구별 타이밍이 다름",
   },
   {
     id: "jeonse-vs-maemae",
@@ -107,6 +118,7 @@ export const COMPARE_TOPICS: CompareTopic[] = [
       { label: "24.06", value: 96 },
     ],
     insight: "전세가율 급등기엔 매매 전환, 하락기엔 전세 선호가 두드러집니다.",
+    conclusion: "전세가율 115(지수) 구간 = 전세 부담↑ → 월세·매매 전환 검토 시점",
   },
   {
     id: "redevelop-vs-new",
@@ -130,6 +142,7 @@ export const COMPARE_TOPICS: CompareTopic[] = [
       { label: "24.12", value: 50 },
     ],
     insight: "재개발 기대감은 입주 공백과 맞물릴 때 프리미엄이 커집니다.",
+    conclusion: "재개발 추진지 = 입주 공백 + 기대감 → 신축 대량 입주 전이 유리",
   },
   {
     id: "gyeonggi-vs-seoul-outer",
@@ -153,6 +166,7 @@ export const COMPARE_TOPICS: CompareTopic[] = [
       { label: "24.01", value: 105 },
     ],
     insight: "신도시 대량 입주기엔 외곽 대비 상대적 조정이 나타납니다.",
+    conclusion: "경기 신도시 입주 128(지수) vs 서울 외곽 92 — 같은 예산, 신도시가 상대적 조정",
   },
   {
     id: "changwon-supply",
@@ -174,6 +188,7 @@ export const COMPARE_TOPICS: CompareTopic[] = [
       { label: "21.07", value: 42 },
     ],
     insight: "입주물량 바닥(21.07) 직후 매매지수 급등 구간이 겹칩니다.",
+    conclusion: "창원도 서울과 동일 — 입주 42(지수) → 매매지수 118 급등",
   },
 ];
 
@@ -191,6 +206,8 @@ export function getComparePayload(id: CompareTopicId) {
     regionTag: t.regionTag,
     headline: t.headline,
     insight: t.insight,
+    conclusion: t.conclusion,
+    winnersLosers: t.winnersLosers,
     priceSeries: t.priceSeries,
     supplySeries: t.supplySeries,
     priceLabel: t.priceLabel,

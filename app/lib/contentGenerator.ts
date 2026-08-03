@@ -1,163 +1,115 @@
-import type {
-  CardPayload,
-  GeneratedContent,
-  RankedItem,
-} from "./cardTypes";
-import { getComparePayload } from "./marketData";
-import type { SuggestedTopic } from "./topicSuggester";
-import type { SearchResult } from "./webSearch";
+import type { CardSlide, Category, GeneratedContent } from "./cardTypes";
+import { buildHashtags } from "./hashtags";
+import { findBlueprint, type SuggestedTopic } from "./topicSuggester";
+import { analyzeUnsold, MOCK_UNSOLD_ROWS } from "./unsoldParser";
 
-function shorten(s: string, n: number) {
-  return s.length <= n ? s : s.slice(0, n - 1) + "…";
-}
-
-function buildTierItems(results: SearchResult[], count: number): RankedItem[] {
-  const items: RankedItem[] = [];
-  const seen = new Set<string>();
-  for (const r of results) {
-    const label = shorten(r.title.split(/[-–|]/)[0], 18);
-    if (seen.has(label)) continue;
-    seen.add(label);
-    items.push({
-      rank: items.length + 1,
-      label,
-      hook: shorten(r.snippet || r.source, 10),
-      tier: items.length < 3 ? "S" : items.length < 6 ? "A" : "B",
-    });
-    if (items.length >= count) break;
-  }
-  return items;
-}
-
-function calendarEventsFromSearch(
-  results: SearchResult[],
-  month: number,
-): { day: number; label: string }[] {
-  const defaults = [
-    { day: 5, label: "청약 접수" },
-    { day: 12, label: "전월세 신고" },
-    { day: 18, label: "금리 발표" },
-    { day: 25, label: "종소세 안내" },
-  ];
-  if (results.length === 0) return defaults;
-  return defaults.map((d, i) => ({
-    day: d.day,
-    label: shorten(results[i]?.title.split(/[-–|]/)[0] ?? d.label, 8),
-  }));
-}
-
-export function generateFromTopic(
-  topic: SuggestedTopic,
-  results: SearchResult[],
-  date: string,
-): GeneratedContent {
-  const d = new Date(date);
-  let payload: CardPayload;
-  let caption: string;
-
-  switch (topic.template) {
-    case "meme":
-      payload = {
-        template: "meme",
-        data: {
-          categoryTag: topic.category,
-          punchline: topic.title,
-          memeKey: topic.memeKey ?? "frog",
-        },
-      };
-      caption = `${topic.title}\n\n${topic.hashtags.join(" ")}`;
-      break;
-
-    case "swipe":
-      payload = {
-        template: "swipe",
-        data: {
-          question: topic.title,
-          accent: topic.swipeAccent ?? "green",
-        },
-      };
-      caption = `${topic.title}\n\n스와이프해서 확인\n${topic.hashtags.join(" ")}`;
-      break;
-
-    case "calendar":
-      payload = {
-        template: "calendar",
-        data: {
-          month: d.getMonth() + 1,
-          year: d.getFullYear(),
-          title: topic.title,
-          events: calendarEventsFromSearch(results, d.getMonth() + 1),
-        },
-      };
-      caption = `${topic.title}\n저장해 두세요.\n${topic.hashtags.join(" ")}`;
-      break;
-
-    case "data-compare": {
-      const compare = getComparePayload(
-        topic.compareTopicId ?? "seoul-supply-cliff",
-      );
-      payload = { template: "data-compare", data: compare };
-      caption = `${topic.title}\n${compare.insight}\n${topic.hashtags.join(" ")}`;
-      break;
-    }
-
-    case "tier":
-    default: {
-      const items = buildTierItems(results, topic.defaultCount ?? 8);
-      payload = {
-        template: "tier",
-        data: {
-          tag: topic.category,
-          title: topic.title,
-          subtitle: `TOP ${items.length}`,
-          items,
-        },
-      };
-      caption = items
-        .map((it) => `${it.rank}. ${it.label}`)
-        .join("\n")
-        .concat(`\n\n${topic.hashtags.join(" ")}`);
-      break;
-    }
-  }
-
-  return {
-    topicId: topic.id,
-    topicTitle: topic.title,
-    template: topic.template,
-    payload,
-    caption,
-    hashtags: topic.hashtags,
-    headlines: results.slice(0, 4).map((r) => r.title),
-  };
-}
-
-export function generateUnsoldContent(
-  region: string,
-  top: { district: string; unsoldUnits: number; unsoldRate: number }[],
-  insight: string,
-): GeneratedContent {
-  const payload: CardPayload = {
-    template: "unsold",
-    data: {
+function buildUnsoldSlides(region: string): CardSlide[] {
+  const { top, insight } = analyzeUnsold(MOCK_UNSOLD_ROWS, region);
+  return [
+    {
+      layout: "unsold",
+      headline: `${region} 미분양 TOP 3`,
+      subheadline: "정부 공시 기준 · 미분양률 순",
       region,
-      title: "미분양 주의 구역",
       topRegions: top.map((t) => ({
         name: t.district,
         count: t.unsoldUnits,
         rate: `${t.unsoldRate.toFixed(1)}%`,
       })),
-      insight,
+      highlight: insight,
+      conclusion: `${top[0]?.district ?? region} 미분양률 ${top[0]?.unsoldRate.toFixed(1) ?? "-"}% — 2040은 분양·입주 타이밍 주의`,
+      source: "국토교통부 미분양 현황",
+      accent: "light",
     },
-  };
+  ];
+}
+
+function buildUnsoldCaption(region: string, slides: CardSlide[]): string {
+  const slide = slides[0];
+  const lines = [
+    `${region} 미분양 TOP 3, 2040한테 중요한 구역만 정리했어요.`,
+    "",
+    ...(slide?.topRegions?.map(
+      (r, i) => `${i + 1}. ${r.name} — 미분양 ${r.count}호 (${r.rate})`,
+    ) ?? []),
+    "",
+    slide?.conclusion ?? slide?.highlight ?? "",
+    "",
+    "분양·입주 타이밍 잡을 때 참고하세요. 저장 추천!",
+  ];
+  return lines.join("\n");
+}
+
+export function generateFromTopic(
+  topic: SuggestedTopic,
+  date: string,
+): GeneratedContent {
+  const bp = findBlueprint(topic.blueprintId, topic.category, date);
+  if (!bp) {
+    throw new Error("주제를 찾을 수 없습니다.");
+  }
+
+  let slides: CardSlide[] =
+    bp.unsoldRegion || topic.unsoldRegion
+      ? buildUnsoldSlides(topic.unsoldRegion ?? bp.unsoldRegion ?? "경기")
+      : bp.buildSlides(date);
+
+  slides = slides.map((s, i) => ({
+    ...s,
+    slideIndex: s.slideIndex ?? (slides.length > 1 ? i + 1 : undefined),
+    totalSlides: s.totalSlides ?? (slides.length > 1 ? slides.length : undefined),
+  }));
+
+  const hashtags = buildHashtags(topic.category);
+  const bodyCaption =
+    bp.unsoldRegion || topic.unsoldRegion
+      ? buildUnsoldCaption(topic.unsoldRegion ?? bp.unsoldRegion ?? "경기", slides)
+      : bp.buildCaption(slides);
+
+  const caption = `${bodyCaption}\n\n${hashtags.join(" ")}`;
 
   return {
-    topicId: `unsold-${region}`,
-    topicTitle: "미분양 현황",
-    template: "unsold",
-    payload,
-    caption: `${region} 미분양 TOP3\n${insight}\n#미분양 #부동산 #quickline_mr`,
-    hashtags: ["#미분양", "#부동산", "#quickline_mr"],
-    headlines: top.map((t) => `${t.district} ${t.unsoldRate.toFixed(1)}%`),
+    topicId: topic.id,
+    summary: bp.summary,
+    format: bp.format,
+    slides,
+    caption,
+    hashtags,
+  };
+}
+
+export function generateUnsoldFromUpload(
+  region: string,
+  rows: typeof MOCK_UNSOLD_ROWS,
+): GeneratedContent {
+  const { top, insight } = analyzeUnsold(rows, region);
+  const slides: CardSlide[] = [
+    {
+      layout: "unsold",
+      headline: `${region} 미분양 TOP 3`,
+      subheadline: "업로드 데이터 기준",
+      region,
+      topRegions: top.map((t) => ({
+        name: t.district,
+        count: t.unsoldUnits,
+        rate: `${t.unsoldRate.toFixed(1)}%`,
+      })),
+      highlight: insight,
+      conclusion: `${top[0]?.district ?? region}가 ${top[0]?.unsoldRate.toFixed(1) ?? "-"}%로 최고 — 분양·전세 협상력↑ 구역`,
+      source: "업로드 엑셀 · 정부 미분양 공시",
+      accent: "light",
+    },
+  ];
+
+  const hashtags = buildHashtags("미분양·공급");
+  const caption = `${buildUnsoldCaption(region, slides)}\n\n${hashtags.join(" ")}`;
+
+  return {
+    topicId: `unsold-upload-${region}`,
+    summary: `${region} 미분양 TOP 3 — ${top[0]?.district ?? ""} ${top[0]?.unsoldRate.toFixed(1) ?? ""}% 등 업로드 데이터 기반 한 장 요약`,
+    format: "single",
+    slides,
+    caption,
+    hashtags,
   };
 }

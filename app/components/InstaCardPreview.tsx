@@ -1,181 +1,216 @@
 "use client";
 
-import type {
-  CalendarPayload,
-  CardPayload,
-  DataComparePayload,
-  MemePayload,
-  SwipePayload,
-  TierPayload,
-  UnsoldPayload,
-} from "../lib/cardTypes";
+import type { CardSlide, ChartPoint, WinnerLoser } from "../lib/cardTypes";
 import { BRAND_HANDLE } from "../lib/cardTypes";
 
 interface InstaCardPreviewProps {
-  payload: CardPayload;
+  slide: CardSlide;
 }
 
-export function InstaCardPreview({ payload }: InstaCardPreviewProps) {
-  switch (payload.template) {
-    case "meme":
-      return <MemeCard data={payload.data} />;
-    case "swipe":
-      return <SwipeCard data={payload.data} />;
+export function InstaCardPreview({ slide }: InstaCardPreviewProps) {
+  switch (slide.layout) {
+    case "hook":
+      return <HookSlide data={slide} />;
+    case "story":
+      return <StorySlide data={slide} />;
+    case "insight":
+      return <InsightSlide data={slide} />;
     case "calendar":
-      return <CalendarCard data={payload.data} />;
-    case "data-compare":
-      return <DataCompareCard data={payload.data} />;
-    case "tier":
-      return <TierCard data={payload.data} />;
+      return <CalendarSlide data={slide} />;
+    case "chart":
+      return <ChartSlide data={slide} />;
+    case "ranking":
+      return <RankingSlide data={slide} />;
+    case "policy":
+      return <PolicySlide data={slide} />;
     case "unsold":
-      return <UnsoldCard data={payload.data} />;
+      return <UnsoldSlide data={slide} />;
     default:
       return null;
   }
 }
 
-function CardShell({
-  children,
-  bg,
-  text = "#1a1a1a",
-}: {
-  children: React.ReactNode;
-  bg: string;
-  text?: string;
-}) {
+function SlideCounter({ index, total }: { index?: number; total?: number }) {
+  if (!index || !total || total <= 1) return null;
   return (
-    <div
-      className="relative flex aspect-square w-full flex-col font-[family-name:var(--font-pretendard)]"
-      style={{ backgroundColor: bg, color: text }}
-    >
-      {children}
-      <footer className="absolute bottom-5 left-0 right-0 text-center text-[10px] tracking-wide opacity-40">
-        {BRAND_HANDLE}
-      </footer>
-    </div>
-  );
-}
-
-function Tag({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="text-[11px] tracking-[0.2em] uppercase opacity-50">
-      {children}
+    <span className="absolute right-5 top-4 text-[10px] font-semibold opacity-45">
+      {index}/{total}
     </span>
   );
 }
 
-/* ── Type A: Meme ── */
-function MemeIllustration({ kind }: { kind: MemePayload["memeKey"] }) {
-  if (kind === "frog")
-    return (
-      <svg viewBox="0 0 120 100" className="mx-auto h-28 w-28" aria-hidden>
-        <ellipse cx="60" cy="65" rx="38" ry="28" fill="#7CB87A" />
-        <circle cx="42" cy="42" r="14" fill="#7CB87A" />
-        <circle cx="78" cy="42" r="14" fill="#7CB87A" />
-        <circle cx="42" cy="42" r="6" fill="#fff" />
-        <circle cx="78" cy="42" r="6" fill="#fff" />
-        <path d="M48 72 Q60 78 72 72" stroke="#4a7a48" fill="none" strokeWidth="2" />
-        <path d="M55 58 Q58 52 62 58" stroke="#6EC6E6" fill="none" strokeWidth="2" opacity="0.8" />
-      </svg>
-    );
-  if (kind === "cat")
-    return (
-      <svg viewBox="0 0 120 100" className="mx-auto h-28 w-28" aria-hidden>
-        <ellipse cx="60" cy="62" rx="32" ry="26" fill="#C4A882" />
-        <polygon points="35,35 42,18 50,35" fill="#C4A882" />
-        <polygon points="70,35 78,18 85,35" fill="#C4A882" />
-        <ellipse cx="48" cy="58" rx="5" ry="7" fill="#1a1a1a" />
-        <ellipse cx="72" cy="58" rx="5" ry="7" fill="#1a1a1a" />
-        <ellipse cx="60" cy="68" rx="4" ry="3" fill="#e8a090" />
-      </svg>
-    );
+function SourceLine({ text }: { text?: string }) {
+  if (!text) return null;
+  return <p className="text-[8px] leading-relaxed opacity-40">{text}</p>;
+}
+
+function HighlightBox({ text, variant = "dark" }: { text: string; variant?: "dark" | "green" }) {
+  const bg = variant === "green" ? "#1B3D34" : "#111111";
   return (
-    <svg viewBox="0 0 120 100" className="mx-auto h-28 w-28" aria-hidden>
-      <rect x="25" y="30" width="70" height="50" rx="4" fill="#E8E4DE" stroke="#ccc" />
-      <rect x="35" y="40" width="50" height="6" rx="2" fill="#bbb" />
-      <rect x="35" y="52" width="35" height="4" rx="2" fill="#ddd" />
-      <circle cx="60" cy="22" r="10" fill="#E8E4DE" stroke="#ccc" />
-    </svg>
+    <div className="mt-3 px-3 py-2.5 text-[11px] font-bold leading-snug text-white" style={{ backgroundColor: bg }}>
+      {text}
+    </div>
   );
 }
 
-function MemeCard({ data }: { data: MemePayload }) {
+function WinnerLoserList({ items }: { items?: WinnerLoser[] }) {
+  if (!items?.length) return null;
+  const colors = { winner: "#1B3D34", loser: "#C45C4A", neutral: "#666" };
+  const labels = { winner: "↑", loser: "↓", neutral: "·" };
   return (
-    <CardShell bg="#FAF8F5">
-      <div className="flex flex-1 flex-col px-8 pt-10 pb-14">
-        <Tag>{data.categoryTag}</Tag>
-        <div className="my-6 flex flex-1 items-center justify-center">
-          <MemeIllustration kind={data.memeKey} />
-        </div>
-        <p className="text-center text-[17px] font-bold leading-snug tracking-tight">
-          {data.punchline}
-        </p>
+    <ul className="mt-3 space-y-1.5">
+      {items.map((w, i) => (
+        <li key={i} className="flex gap-2 text-[10px] leading-snug">
+          <span className="font-bold" style={{ color: colors[w.side] }}>
+            {labels[w.side]}
+          </span>
+          <span>
+            <strong>{w.label}</strong>
+            <span className="opacity-55"> — {w.reason}</span>
+          </span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+/* ── Hook (corp.inside style) ── */
+function HookSlide({ data }: { data: CardSlide }) {
+  return (
+    <div
+      className="relative flex aspect-square w-full flex-col justify-end overflow-hidden font-[family-name:var(--font-pretendard)]"
+      style={{ backgroundColor: "#111", color: "#fff" }}
+    >
+      <SlideCounter index={data.slideIndex} total={data.totalSlides} />
+      <div className="px-8 pb-16 pt-10">
+        <h1 className="text-[26px] font-extrabold leading-[1.2] tracking-tight">{data.headline}</h1>
+        {data.subheadline && (
+          <p className="mt-3 text-[15px] font-semibold leading-snug opacity-80">{data.subheadline}</p>
+        )}
       </div>
-    </CardShell>
+      <span className="absolute bottom-4 right-5 text-[9px] opacity-30">{BRAND_HANDLE}</span>
+    </div>
   );
 }
 
-/* ── Type B: Swipe ── */
-const SWIPE_BG = {
-  cream: { bg: "#F5F0E8", fg: "#1a1a1a" },
-  green: { bg: "#1B3D34", fg: "#F5F0E8" },
-  charcoal: { bg: "#2A2A2A", fg: "#F5F0E8" },
+/* ── Story text slide ── */
+function StorySlide({ data }: { data: CardSlide }) {
+  return (
+    <div className="relative flex aspect-square w-full flex-col bg-white font-[family-name:var(--font-pretendard)] text-[#111]">
+      <SlideCounter index={data.slideIndex} total={data.totalSlides} />
+      <div className="flex flex-1 flex-col px-7 pb-14 pt-10">
+        <h2 className="text-[20px] font-extrabold leading-tight">{data.headline}</h2>
+        <ul className="mt-5 flex-1 space-y-3">
+          {data.body?.map((line, i) => (
+            <li key={i} className="text-[13px] font-medium leading-[1.55]">
+              {line}
+            </li>
+          ))}
+        </ul>
+        {data.highlight && <HighlightBox text={data.highlight} variant="dark" />}
+      </div>
+      <span className="absolute bottom-4 right-5 text-[9px] opacity-30">{BRAND_HANDLE}</span>
+    </div>
+  );
+}
+
+/* ── Insight conclusion ── */
+function InsightSlide({ data }: { data: CardSlide }) {
+  const dark = data.accent === "dark";
+  return (
+    <div
+      className="relative flex aspect-square w-full flex-col font-[family-name:var(--font-pretendard)]"
+      style={{
+        backgroundColor: dark ? "#111" : data.accent === "green" ? "#F5F0E8" : "#fff",
+        color: dark ? "#fff" : "#111",
+      }}
+    >
+      <SlideCounter index={data.slideIndex} total={data.totalSlides} />
+      <div className="flex flex-1 flex-col px-7 pb-14 pt-9">
+        {data.subheadline && (
+          <p className={`text-[13px] font-bold ${dark ? "opacity-70" : "opacity-50"}`}>
+            {data.subheadline}
+          </p>
+        )}
+        <h2 className="mt-1 text-[22px] font-extrabold leading-tight">{data.headline}</h2>
+        {data.body && (
+          <ul className="mt-4 space-y-2">
+            {data.body.map((line, i) => (
+              <li key={i} className="text-[12px] font-medium leading-[1.55] opacity-90">
+                {line}
+              </li>
+            ))}
+          </ul>
+        )}
+        {data.highlight && (
+          <HighlightBox text={data.highlight} variant={data.accent === "green" ? "green" : "dark"} />
+        )}
+        <WinnerLoserList items={data.winnersLosers} />
+      </div>
+      <span className="absolute bottom-4 right-5 text-[9px] opacity-30">{BRAND_HANDLE}</span>
+    </div>
+  );
+}
+
+/* ── Calendar (apt_lap style) ── */
+const EVENT_COLORS: Record<string, string> = {
+  tax: "#111",
+  policy: "#1B3D34",
+  supply: "#2563EB",
+  rate: "#C45C4A",
+  general: "#555",
 };
 
-function SwipeCard({ data }: { data: SwipePayload }) {
-  const palette = SWIPE_BG[data.accent];
-  return (
-    <CardShell bg={palette.bg} text={palette.fg}>
-      <div className="flex flex-1 flex-col items-center justify-center px-10 pb-14 pt-10">
-        <div className="mb-10 opacity-20">
-          <svg viewBox="0 0 80 120" className="h-24 w-16" aria-hidden>
-            <ellipse cx="40" cy="28" rx="18" ry="22" fill="currentColor" />
-            <path d="M18 120 Q40 70 62 120" fill="currentColor" />
-          </svg>
-        </div>
-        <h2 className="text-center text-[22px] font-extrabold leading-[1.35] tracking-tight">
-          {data.question}
-        </h2>
-      </div>
-    </CardShell>
-  );
-}
-
-/* ── Type C: Calendar ── */
-function CalendarCard({ data }: { data: CalendarPayload }) {
-  const daysInMonth = new Date(data.year, data.month, 0).getDate();
-  const firstDay = new Date(data.year, data.month - 1, 1).getDay();
-  const eventMap = new Map(data.events.map((e) => [e.day, e]));
+function CalendarSlide({ data }: { data: CardSlide }) {
+  const month = data.month ?? 1;
+  const year = data.year ?? 2026;
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const firstDay = new Date(year, month - 1, 1).getDay();
+  const eventMap = new Map<number, NonNullable<CardSlide["events"]>[number]>();
+  for (const ev of data.events ?? []) {
+    const end = ev.endDay ?? ev.day;
+    for (let d = ev.day; d <= end; d++) {
+      if (!eventMap.has(d)) eventMap.set(d, ev);
+    }
+  }
 
   const cells: (number | null)[] = [];
   for (let i = 0; i < firstDay; i++) cells.push(null);
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
 
   return (
-    <CardShell bg="#FFFEFC">
-      <div className="flex flex-1 flex-col px-6 pt-8 pb-14">
-        <Tag>
-          {data.year}.{String(data.month).padStart(2, "0")}
-        </Tag>
-        <h2 className="mt-2 text-[15px] font-bold leading-snug">{data.title}</h2>
-        <div className="mt-4 grid flex-1 grid-cols-7 gap-1 text-[9px]">
-          {["일", "월", "화", "수", "목", "금", "토"].map((d) => (
-            <div key={d} className="text-center opacity-40">
+    <div className="relative flex aspect-square w-full flex-col bg-white font-[family-name:var(--font-pretendard)] text-[#111]">
+      <div className="border-b border-black/10 px-5 pb-3 pt-5">
+        <SourceLine text={data.source ?? `* ${year}년 ${month}월 ver.`} />
+        <h1 className="mt-1 text-[18px] font-extrabold leading-tight">{data.headline}</h1>
+        {data.subheadline && (
+          <p className="mt-0.5 text-[10px] font-medium opacity-50">{data.subheadline}</p>
+        )}
+      </div>
+      <div className="flex flex-1 flex-col px-4 pb-12 pt-3">
+        <div className="grid grid-cols-7 gap-px bg-black/10 text-[8px]">
+          {["일", "월", "화", "수", "목", "금", "토"].map((d, i) => (
+            <div
+              key={d}
+              className={`bg-[#f5f5f5] py-1 text-center font-bold ${i === 0 ? "text-red-600" : i === 6 ? "text-blue-600" : ""}`}
+            >
               {d}
             </div>
           ))}
           {cells.map((day, i) => {
             const ev = day ? eventMap.get(day) : null;
+            const dow = i % 7;
+            const bg = ev ? EVENT_COLORS[ev.type ?? "general"] : "#fff";
+            const fg = ev ? "#fff" : dow === 0 ? "#dc2626" : dow === 6 ? "#2563eb" : "#111";
             return (
               <div
                 key={i}
-                className={`flex min-h-[28px] flex-col items-center justify-start rounded-sm p-0.5 ${
-                  ev ? "bg-[#1B3D34] text-white" : "bg-[#F5F3F0]"
-                }`}
+                className="flex min-h-[36px] flex-col border border-black/[0.04] p-0.5"
+                style={{ backgroundColor: ev ? bg : "#fff", color: ev ? "#fff" : fg }}
               >
-                {day && <span className="font-semibold">{day}</span>}
-                {ev && (
-                  <span className="mt-0.5 line-clamp-2 text-[7px] leading-tight">
+                {day && <span className="text-[9px] font-bold">{day}</span>}
+                {ev && day === ev.day && (
+                  <span className="mt-auto line-clamp-3 text-[6.5px] font-semibold leading-tight">
                     {ev.label}
                   </span>
                 )}
@@ -184,134 +219,185 @@ function CalendarCard({ data }: { data: CalendarPayload }) {
           })}
         </div>
       </div>
-    </CardShell>
+      <span className="absolute bottom-4 right-5 text-[9px] opacity-30">{BRAND_HANDLE}</span>
+    </div>
   );
 }
 
-/* ── Type D: Data Compare ── */
-function MiniChart({
-  series,
-  color,
-  label,
-}: {
-  series: DataComparePayload["priceSeries"];
-  color: string;
-  label: string;
-}) {
+/* ── Chart / data compare ── */
+function LineChart({ series, color, label }: { series: ChartPoint[]; color: string; label: string }) {
   const max = Math.max(...series.map((p) => p.value));
   const min = Math.min(...series.map((p) => p.value));
   const range = max - min || 1;
-  const w = 200;
-  const h = 48;
+  const w = 280;
+  const h = 56;
   const pts = series.map((p, i) => {
-    const x = (i / (series.length - 1)) * w;
-    const y = h - ((p.value - min) / range) * (h - 8) - 4;
-    return { x, y };
+    const x = (i / Math.max(series.length - 1, 1)) * w;
+    const y = h - ((p.value - min) / range) * (h - 10) - 5;
+    return { x, y, v: p.value, l: p.label };
   });
-
   const line = pts.map((p) => `${p.x},${p.y}`).join(" ");
-  const area = `M0,${h} ${pts.map((p) => `L${p.x},${p.y}`).join(" ")} L${w},${h} Z`;
 
   return (
-    <div>
-      <p className="mb-1 text-[9px] font-semibold opacity-50">{label}</p>
+    <div className="mb-2">
+      <div className="mb-1 flex items-baseline justify-between">
+        <span className="text-[10px] font-bold">{label}</span>
+        <span className="text-[9px] font-bold tabular-nums" style={{ color }}>
+          {pts[pts.length - 1]?.v}
+        </span>
+      </div>
       <svg viewBox={`0 0 ${w} ${h}`} className="w-full" aria-hidden>
-        <path d={area} fill={color} opacity="0.08" />
         <polyline points={line} fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" />
+        {pts.map((p, i) => (
+          <text key={i} x={p.x} y={h - 1} fontSize="7" fill="#999" textAnchor="middle">
+            {p.l}
+          </text>
+        ))}
       </svg>
     </div>
   );
 }
 
-function DataCompareCard({ data }: { data: DataComparePayload }) {
+function ChartSlide({ data }: { data: CardSlide }) {
   return (
-    <CardShell bg="#FFFEFC">
-      <div className="flex flex-1 flex-col px-7 pt-8 pb-14">
-        <Tag>{data.regionTag}</Tag>
-        <h2 className="mt-3 text-[16px] font-extrabold leading-snug">
-          {data.headline}
-        </h2>
-        <div className="my-4 space-y-3">
-          <MiniChart
-            series={data.priceSeries}
-            color="#C45C4A"
-            label={data.priceLabel ?? "매매지수"}
-          />
-          <MiniChart
-            series={data.supplySeries}
-            color="#1B3D34"
-            label={data.supplyLabel ?? "입주물량(지수)"}
-          />
-        </div>
-        <p className="mt-auto text-[11px] leading-relaxed opacity-60">
-          {data.insight}
-        </p>
-        <svg className="absolute right-6 top-16 h-8 w-12 opacity-15" aria-hidden>
-          <path d="M0,20 Q20,5 40,18 T80,12" stroke="#C45C4A" fill="none" strokeWidth="2" />
-          <text x="4" y="8" fontSize="8" fill="#C45C4A">
-            ↑
-          </text>
-        </svg>
+    <div className="relative flex aspect-square w-full flex-col bg-white font-[family-name:var(--font-pretendard)] text-[#111]">
+      <div className="bg-[#111] px-5 py-4 text-white">
+        <SourceLine text={data.source} />
+        <h2 className="mt-1 text-[15px] font-extrabold leading-snug">{data.headline}</h2>
+        {data.subheadline && <p className="mt-0.5 text-[10px] opacity-60">{data.subheadline}</p>}
       </div>
-    </CardShell>
+      <div className="flex flex-1 flex-col px-5 pb-14 pt-4">
+        {data.priceSeries && data.priceLabel && (
+          <LineChart series={data.priceSeries} color="#C45C4A" label={data.priceLabel} />
+        )}
+        {data.supplySeries && data.supplyLabel && (
+          <LineChart series={data.supplySeries} color="#1B3D34" label={data.supplyLabel} />
+        )}
+        {data.conclusion && <HighlightBox text={data.conclusion} variant="green" />}
+        <WinnerLoserList items={data.winnersLosers} />
+      </div>
+      <span className="absolute bottom-4 right-5 text-[9px] opacity-30">{BRAND_HANDLE}</span>
+    </div>
   );
 }
 
-/* ── Tier (minimal, 20~40% only) ── */
-function TierCard({ data }: { data: TierPayload }) {
+/* ── Ranking (apt_lap list) ── */
+function RankingSlide({ data }: { data: CardSlide }) {
   return (
-    <CardShell bg="#F5F0E8">
-      <div className="flex flex-1 flex-col px-7 pt-9 pb-14">
-        <Tag>{data.tag}</Tag>
-        <h2 className="mt-2 text-[15px] font-extrabold">{data.title}</h2>
-        <p className="mt-1 text-[11px] opacity-50">{data.subtitle}</p>
-        <ul className="mt-5 flex-1 space-y-2">
-          {data.items.slice(0, 10).map((item) => (
-            <li
-              key={item.rank}
-              className="flex items-baseline gap-3 border-b border-black/5 pb-2"
-            >
-              <span className="w-4 text-[12px] font-bold tabular-nums opacity-40">
-                {item.rank}
-              </span>
-              <span className="flex-1 text-[12px] font-semibold">{item.label}</span>
-              {item.tier && (
-                <span className="text-[10px] font-bold opacity-30">{item.tier}</span>
-              )}
+    <div className="relative flex aspect-square w-full flex-col bg-white font-[family-name:var(--font-pretendard)] text-[#111]">
+      <div className="bg-[#111] px-5 py-4 text-white">
+        <SourceLine text={data.source} />
+        <h2 className="mt-1 text-[16px] font-extrabold">{data.headline}</h2>
+        {data.subheadline && <p className="text-[10px] opacity-60">{data.subheadline}</p>}
+      </div>
+      <ul className="flex-1 overflow-hidden px-0 pb-12">
+        {data.rows?.map((row, i) => (
+          <li
+            key={row.rank}
+            className={`flex items-center gap-2 border-b border-black/5 px-4 py-2.5 ${i % 2 ? "bg-[#fafafa]" : ""}`}
+          >
+            <span className="w-4 text-[11px] font-bold tabular-nums opacity-40">{row.rank}</span>
+            <span className="min-w-[44px] bg-[#111] px-2 py-1 text-[10px] font-bold text-white">
+              {row.label}
+            </span>
+            <div className="min-w-0 flex-1">
+              {row.sub && <p className="truncate text-[10px] opacity-60">{row.sub}</p>}
+            </div>
+            <span className={`text-[13px] font-extrabold tabular-nums ${row.highlight ? "text-[#C45C4A]" : ""}`}>
+              {row.value}
+            </span>
+          </li>
+        ))}
+      </ul>
+      {data.highlight && (
+        <div className="mx-4 mb-10">
+          <HighlightBox text={data.highlight} variant="dark" />
+        </div>
+      )}
+      <span className="absolute bottom-4 right-5 text-[9px] opacity-30">{BRAND_HANDLE}</span>
+    </div>
+  );
+}
+
+/* ── Policy (apt_lap faces) ── */
+function PolicySlide({ data }: { data: CardSlide }) {
+  return (
+    <div className="relative flex aspect-square w-full flex-col bg-white font-[family-name:var(--font-pretendard)] text-[#111]">
+      <div className="border-b-4 border-[#111] px-5 py-3">
+        <SourceLine text={data.source} />
+        <h2 className="text-[17px] font-extrabold leading-tight">{data.headline}</h2>
+        {data.subheadline && <p className="mt-0.5 text-[11px] font-semibold">{data.subheadline}</p>}
+      </div>
+      <div className="grid flex-1 grid-cols-3 gap-2 px-3 pb-14 pt-3">
+        {data.people?.map((p) => (
+          <div key={p.name} className="flex flex-col border border-black/10">
+            <div className="flex h-16 items-center justify-center bg-[#e8e8e8]">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#ccc] text-[14px] font-bold text-white">
+                {p.name.slice(0, 1)}
+              </div>
+            </div>
+            <div className="bg-[#111] px-1 py-1 text-center text-[8px] font-bold text-white">{p.role}</div>
+            <div className="flex flex-1 flex-col items-center justify-center p-2 text-center">
+              <p className="text-[18px] font-extrabold tabular-nums">{p.stat}</p>
+              <p className="text-[8px] opacity-50">{p.statLabel}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+      {data.body && (
+        <ul className="space-y-1 px-5 pb-3">
+          {data.body.map((line, i) => (
+            <li key={i} className="text-[10px] font-medium leading-snug">
+              · {line}
             </li>
           ))}
         </ul>
-      </div>
-    </CardShell>
+      )}
+      {data.highlight && (
+        <div className="mx-4 mb-10">
+          <HighlightBox text={data.highlight} variant="green" />
+        </div>
+      )}
+      <span className="absolute bottom-4 right-5 text-[9px] opacity-30">{BRAND_HANDLE}</span>
+    </div>
   );
 }
 
 /* ── Unsold ── */
-function UnsoldCard({ data }: { data: UnsoldPayload }) {
+function UnsoldSlide({ data }: { data: CardSlide }) {
   return (
-    <CardShell bg="#FFFEFC">
-      <div className="flex flex-1 flex-col px-7 pt-9 pb-14">
-        <Tag>{data.region}</Tag>
-        <h2 className="mt-2 text-[15px] font-extrabold leading-snug">{data.title}</h2>
-        <ul className="mt-6 flex-1 space-y-4">
-          {data.topRegions.map((r, i) => (
-            <li key={r.name} className="flex items-end gap-3">
-              <span className="w-4 text-[13px] font-bold opacity-30">{i + 1}</span>
-              <div className="flex-1">
-                <p className="text-[13px] font-bold">{r.name}</p>
-                <div className="mt-1 h-1.5 w-full bg-black/5">
-                  <div
-                    className="h-full bg-[#C45C4A]"
-                    style={{ width: `${Math.min(parseFloat(r.rate), 100)}%` }}
-                  />
-                </div>
-              </div>
-              <span className="text-[12px] font-bold tabular-nums">{r.rate}</span>
-            </li>
-          ))}
-        </ul>
-        <p className="mt-4 text-[10px] leading-relaxed opacity-50">{data.insight}</p>
+    <div className="relative flex aspect-square w-full flex-col bg-white font-[family-name:var(--font-pretendard)] text-[#111]">
+      <div className="bg-[#111] px-5 py-4 text-white">
+        <SourceLine text={data.source} />
+        <h2 className="mt-1 text-[16px] font-extrabold">{data.headline}</h2>
+        {data.subheadline && <p className="text-[10px] opacity-60">{data.subheadline}</p>}
       </div>
-    </CardShell>
+      <ul className="flex-1 space-y-0 px-4 pb-4 pt-4">
+        {data.topRegions?.map((r, i) => (
+          <li key={r.name} className="border-b border-black/5 py-3">
+            <div className="flex items-end justify-between">
+              <div className="flex items-baseline gap-2">
+                <span className="text-[14px] font-bold opacity-30">{i + 1}</span>
+                <span className="text-[14px] font-extrabold">{r.name}</span>
+              </div>
+              <span className="text-[15px] font-extrabold tabular-nums text-[#C45C4A]">{r.rate}</span>
+            </div>
+            <p className="mt-0.5 pl-6 text-[10px] opacity-50">미분양 {r.count.toLocaleString()}호</p>
+            <div className="mt-1.5 h-2 w-full bg-black/5">
+              <div
+                className="h-full bg-[#C45C4A]"
+                style={{ width: `${Math.min(parseFloat(r.rate), 100)}%` }}
+              />
+            </div>
+          </li>
+        ))}
+      </ul>
+      {data.conclusion && (
+        <div className="mx-4 mb-10">
+          <HighlightBox text={data.conclusion} variant="green" />
+        </div>
+      )}
+      <span className="absolute bottom-4 right-5 text-[9px] opacity-30">{BRAND_HANDLE}</span>
+    </div>
   );
 }

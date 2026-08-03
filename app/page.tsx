@@ -2,23 +2,22 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toPng } from "html-to-image";
-import { Copy, Download, RefreshCw, Upload } from "lucide-react";
+import { ChevronLeft, ChevronRight, Copy, Download, DownloadCloud, RefreshCw, Upload } from "lucide-react";
 import { InstaCardPreview } from "./components/InstaCardPreview";
 import {
   BRAND_HANDLE,
   CATEGORIES,
-  TEMPLATE_LABELS,
+  FORMAT_LABELS,
   UNSOLD_REGIONS,
   type Category,
   type GeneratedContent,
 } from "./lib/cardTypes";
+import { generateUnsoldFromUpload } from "./lib/contentGenerator";
 import {
-  analyzeUnsold,
   MOCK_UNSOLD_ROWS,
   parseUnsoldExcel,
   type UnsoldRow,
 } from "./lib/unsoldParser";
-import { generateUnsoldContent } from "./lib/contentGenerator";
 import type { SuggestedTopic } from "./lib/topicSuggester";
 
 function today() {
@@ -33,6 +32,7 @@ export default function Home() {
   const [topics, setTopics] = useState<SuggestedTopic[]>([]);
   const [selected, setSelected] = useState<SuggestedTopic | null>(null);
   const [content, setContent] = useState<GeneratedContent | null>(null);
+  const [slideIndex, setSlideIndex] = useState(0);
   const [loadingTopics, setLoadingTopics] = useState(false);
   const [generating, setGenerating] = useState(false);
 
@@ -57,6 +57,7 @@ export default function Home() {
         setTopics(data.topics);
         setSelected(data.topics[0] ?? null);
         setContent(null);
+        setSlideIndex(0);
       }
     } finally {
       setLoadingTopics(false);
@@ -77,16 +78,18 @@ export default function Home() {
         body: JSON.stringify({ topic: selected, date }),
       });
       const data = await res.json();
-      if (res.ok) setContent(data as GeneratedContent);
-      else notify(data.error ?? "생성 실패");
+      if (res.ok) {
+        setContent(data as GeneratedContent);
+        setSlideIndex(0);
+      } else notify(data.error ?? "생성 실패");
     } finally {
       setGenerating(false);
     }
   };
 
   const handleUnsold = () => {
-    const { top, insight } = analyzeUnsold(unsoldRows, unsoldRegion);
-    setContent(generateUnsoldContent(unsoldRegion, top, insight));
+    setContent(generateUnsoldFromUpload(unsoldRegion, unsoldRows));
+    setSlideIndex(0);
     notify("미분양 카드 생성");
   };
 
@@ -97,17 +100,41 @@ export default function Home() {
     notify(`${rows.length}건 파싱 완료`);
   };
 
-  const handleDownload = async () => {
-    if (!cardRef.current) return;
+  const currentSlide = content?.slides[slideIndex] ?? null;
+  const totalSlides = content?.slides.length ?? 0;
+
+  const handleDownloadCurrent = async () => {
+    if (!cardRef.current || !content) return;
     const url = await toPng(cardRef.current, { pixelRatio: 2, cacheBust: true });
     const a = document.createElement("a");
     a.href = url;
-    a.download = `easyecon-${date}.png`;
+    a.download = `easyecon-${date}-${slideIndex + 1}.png`;
     a.click();
-    notify("PNG 저장");
+    notify(`${slideIndex + 1}장 저장`);
   };
 
-  const payload = content?.payload ?? null;
+  const handleDownloadAll = async () => {
+    if (!content || !cardRef.current) return;
+    for (let i = 0; i < content.slides.length; i++) {
+      setSlideIndex(i);
+      await new Promise((r) => setTimeout(r, 120));
+      const el = cardRef.current;
+      if (!el) continue;
+      const url = await toPng(el, { pixelRatio: 2, cacheBust: true });
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `easyecon-${date}-${i + 1}.png`;
+      a.click();
+      await new Promise((r) => setTimeout(r, 300));
+    }
+    notify(`전체 ${content.slides.length}장 저장`);
+  };
+
+  const copyCaption = () => {
+    if (!content?.caption) return;
+    void navigator.clipboard.writeText(content.caption);
+    notify("본문+해시태그 복사");
+  };
 
   return (
     <div className="min-h-screen bg-[#f7f6f4]">
@@ -126,7 +153,6 @@ export default function Home() {
       </header>
 
       <main className="mx-auto grid max-w-6xl grid-cols-1 gap-10 px-8 py-10 lg:grid-cols-12">
-        {/* ── Left ── */}
         <aside className="space-y-8 lg:col-span-5">
           <section>
             <Field label="기준일" />
@@ -155,7 +181,7 @@ export default function Home() {
 
           <section>
             <div className="mb-3 flex items-center justify-between">
-              <Field label="오늘의 주제" />
+              <Field label="오늘의 주제 · 4개" />
               <button
                 type="button"
                 onClick={() => void loadTopics()}
@@ -166,9 +192,9 @@ export default function Home() {
               </button>
             </div>
             <p className="mb-4 text-xs leading-relaxed text-black/45">
-              웹 트렌드 기반 5개 제안 · Tier 1~2개 · 부동산 주 1~2회 데이터(Type D)
+              인사이트 중심 · 2개는 스토리(캐러셀) · 한 장에 내용 완결
             </p>
-            <ul className="space-y-1">
+            <ul className="space-y-3">
               {topics.map((t) => (
                 <li key={t.id}>
                   <button
@@ -176,15 +202,18 @@ export default function Home() {
                     onClick={() => {
                       setSelected(t);
                       setContent(null);
+                      setSlideIndex(0);
                     }}
-                    className={`w-full py-3 text-left transition ${
+                    className={`w-full py-2 text-left transition ${
                       selected?.id === t.id ? "opacity-100" : "opacity-55 hover:opacity-80"
                     }`}
                   >
                     <span className="text-[10px] tracking-wide text-black/40">
-                      {TEMPLATE_LABELS[t.template]}
+                      {FORMAT_LABELS[t.format]}
                     </span>
-                    <p className="mt-0.5 text-[13px] font-medium leading-snug">{t.title}</p>
+                    <p className="mt-1 text-[12px] font-medium leading-relaxed text-black/80">
+                      {t.summary}
+                    </p>
                   </button>
                 </li>
               ))}
@@ -200,7 +229,7 @@ export default function Home() {
           </section>
 
           <section className="border-t border-black/[0.06] pt-8">
-            <Field label="미분양 분석" />
+            <Field label="미분양 분석 (부동산 데이터)" />
             <select
               value={unsoldRegion}
               onChange={(e) => setUnsoldRegion(e.target.value)}
@@ -212,12 +241,9 @@ export default function Home() {
                 </option>
               ))}
             </select>
-
             <label className="mt-4 flex cursor-pointer flex-col items-center border border-dashed border-black/15 py-6 text-center">
               <Upload className="mb-2 h-4 w-4 text-black/30" />
-              <span className="text-xs text-black/45">
-                정부 미분양 엑셀 (.xlsx) 업로드
-              </span>
+              <span className="text-xs text-black/45">정부 미분양 엑셀 (.xlsx) 업로드</span>
               {excelName && (
                 <span className="mt-1 text-[10px] text-black/35">{excelName}</span>
               )}
@@ -231,9 +257,6 @@ export default function Home() {
                 }}
               />
             </label>
-            <p className="mt-2 text-[10px] leading-relaxed text-black/35">
-              업로드 없이 Mock 데이터로 테스트 가능 · 컬럼: 시도, 시군구, 미분양
-            </p>
             <button
               type="button"
               onClick={handleUnsold}
@@ -244,43 +267,86 @@ export default function Home() {
           </section>
         </aside>
 
-        {/* ── Right ── */}
         <div className="lg:col-span-7">
           <div className="sticky top-8">
             <div
               ref={cardRef}
               className="mx-auto max-w-[420px] overflow-hidden shadow-[0_8px_40px_rgba(0,0,0,0.08)]"
             >
-              {payload ? (
-                <InstaCardPreview payload={payload} />
+              {currentSlide ? (
+                <InstaCardPreview slide={currentSlide} />
               ) : (
-                <div className="flex aspect-square items-center justify-center bg-[#F5F0E8] text-sm text-black/30">
+                <div className="flex aspect-square items-center justify-center bg-[#F5F0E8] px-8 text-center text-sm leading-relaxed text-black/30">
                   주제를 선택해 카드를 생성하세요
                 </div>
               )}
             </div>
 
-            <div className="mx-auto mt-6 flex max-w-[420px] gap-6">
+            {totalSlides > 1 && (
+              <div className="mx-auto mt-4 flex max-w-[420px] items-center justify-between">
+                <button
+                  type="button"
+                  disabled={slideIndex <= 0}
+                  onClick={() => setSlideIndex((i) => i - 1)}
+                  className="flex items-center gap-1 text-sm text-black/50 disabled:opacity-25"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  이전
+                </button>
+                <div className="flex gap-1.5">
+                  {content!.slides.map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setSlideIndex(i)}
+                      className={`h-1.5 rounded-full transition-all ${
+                        i === slideIndex ? "w-5 bg-black/70" : "w-1.5 bg-black/20"
+                      }`}
+                      aria-label={`${i + 1}장`}
+                    />
+                  ))}
+                </div>
+                <button
+                  type="button"
+                  disabled={slideIndex >= totalSlides - 1}
+                  onClick={() => setSlideIndex((i) => i + 1)}
+                  className="flex items-center gap-1 text-sm text-black/50 disabled:opacity-25"
+                >
+                  다음
+                  <ChevronRight className="h-4 w-4" />
+                </button>
+              </div>
+            )}
+
+            <div className="mx-auto mt-5 flex max-w-[420px] flex-wrap gap-5">
               <button
                 type="button"
-                disabled={!payload}
-                onClick={() => void handleDownload()}
+                disabled={!currentSlide}
+                onClick={() => void handleDownloadCurrent()}
                 className="flex items-center gap-2 text-sm text-black/60 disabled:opacity-30"
               >
                 <Download className="h-4 w-4" />
-                PNG
+                {totalSlides > 1 ? `${slideIndex + 1}장 PNG` : "PNG"}
               </button>
+              {totalSlides > 1 && (
+                <button
+                  type="button"
+                  disabled={!content}
+                  onClick={() => void handleDownloadAll()}
+                  className="flex items-center gap-2 text-sm text-black/60 disabled:opacity-30"
+                >
+                  <DownloadCloud className="h-4 w-4" />
+                  전체 {totalSlides}장
+                </button>
+              )}
               <button
                 type="button"
                 disabled={!content?.caption}
-                onClick={() => {
-                  void navigator.clipboard.writeText(content!.caption);
-                  notify("본문 복사");
-                }}
+                onClick={copyCaption}
                 className="flex items-center gap-2 text-sm text-black/60 disabled:opacity-30"
               >
                 <Copy className="h-4 w-4" />
-                캡션
+                본문
               </button>
             </div>
 
@@ -288,8 +354,8 @@ export default function Home() {
               <textarea
                 readOnly
                 value={content.caption}
-                className="mx-auto mt-6 block w-full max-w-[420px] resize-none border-0 bg-transparent text-xs leading-relaxed text-black/50 outline-none"
-                rows={6}
+                className="mx-auto mt-6 block w-full max-w-[420px] resize-none border-0 bg-transparent text-xs leading-relaxed text-black/55 outline-none"
+                rows={10}
               />
             )}
           </div>
