@@ -19,7 +19,7 @@ export const COMPARE_TOPICS: CompareTopic[] = [
     id: "gangnam-vs-mapo",
     title: "강남 vs 마포, 같은 전세인데 왜 체감이 다를까?",
     regionTag: "서울 · 동네 비교",
-    headline: "강남·마포 KB 매매지수 vs 입주물량",
+    headline: "강남·마포\n같은 전세 다른 체감",
     priceLabel: "강남 매매지수",
     supplyLabel: "마포 입주물량(지수)",
     priceSeries: [
@@ -37,7 +37,7 @@ export const COMPARE_TOPICS: CompareTopic[] = [
       { label: "24.03", value: 48 },
     ],
     insight: "마포 입주 절벽 구간과 강남 가격 반등 타이밍이 겹칩니다.",
-    conclusion: "강남은 수요·학군 프리미엄, 마포는 입주 절벽 후 반등 — 같은 전세라도 체감 다른 이유",
+    conclusion: "마포 입주 절벽 + 강남 반등 = 같은 전세, 체감은 완전 다름",
     winnersLosers: [
       { side: "winner", label: "강남·서초 거주", reason: "수요·학군 방어" },
       { side: "loser", label: "마포 대량 입주 직후", reason: "공급 압력" },
@@ -48,7 +48,7 @@ export const COMPARE_TOPICS: CompareTopic[] = [
     id: "seoul-supply-cliff",
     title: "공급이 줄면 집값은? 서울 입주절벽 구간 한 장 정리",
     regionTag: "서울 · 공급",
-    headline: "서울 매매지수 vs 입주물량 대조",
+    headline: "입주 줄면\n집값 오른다",
     priceLabel: "매매지수",
     supplyLabel: "입주물량(지수)",
     priceSeries: [
@@ -66,7 +66,7 @@ export const COMPARE_TOPICS: CompareTopic[] = [
       { label: "22.03", value: 48 },
     ],
     insight: "서울은 입주 절벽 구간과 가격 랠리 타이밍이 뚜렷하게 겹칩니다.",
-    conclusion: "입주물량 48(지수)까지 떨어진 22.03, 매매지수 122로 정점 — 공급↓ 가격↑ 패턴",
+    conclusion: "입주 48까지 떨어지면 매매지수 122 — 공급↓ 가격↑ 패턴",
     winnersLosers: [
       { side: "winner", label: "입주 절벽 전 매수", reason: "공급 부족 프리미엄" },
       { side: "loser", label: "대량 입주 직후 매수", reason: "공급 압력·조정" },
@@ -76,7 +76,7 @@ export const COMPARE_TOPICS: CompareTopic[] = [
     id: "mapo-yongsan-seongdong",
     title: "마포·용산·성동, 서울 핵심 3구 중 지금 주목할 곳",
     regionTag: "서울 · 3구",
-    headline: "핵심 3구 매매지수 추이",
+    headline: "마포·용산·성동\n지금 어디?",
     priceLabel: "용산·성동 지수",
     supplyLabel: "마포 신규 입주(지수)",
     priceSeries: [
@@ -100,7 +100,7 @@ export const COMPARE_TOPICS: CompareTopic[] = [
     id: "jeonse-vs-maemae",
     title: "전세 vs 매매, 지금 2040에게 어느 쪽이 유리할까?",
     regionTag: "수도권 · 전월세",
-    headline: "전세가율·매매지수 동행 추이",
+    headline: "전세 vs 매매\n지금 뭐가 이득?",
     priceLabel: "매매지수",
     supplyLabel: "전세가율(지수)",
     priceSeries: [
@@ -124,7 +124,7 @@ export const COMPARE_TOPICS: CompareTopic[] = [
     id: "redevelop-vs-new",
     title: "재개발 vs 신축, 같은 돈 넣었을 때 5년 후 차이",
     regionTag: "서울 · 재개발",
-    headline: "재개발·신축 구간 가격 대조",
+    headline: "재개발 vs 신축\n5년 후 차이",
     priceLabel: "재개발 추진지",
     supplyLabel: "신축 입주(지수)",
     priceSeries: [
@@ -148,7 +148,7 @@ export const COMPARE_TOPICS: CompareTopic[] = [
     id: "gyeonggi-vs-seoul-outer",
     title: "경기 신도시 vs 서울 외곽, 같은 예산 다른 결과",
     regionTag: "수도권 · 비교",
-    headline: "신도시·서울 외곽 매매지수",
+    headline: "신도시 vs 서울 외곽\n같은 예산 다른 결과",
     priceLabel: "서울 외곽",
     supplyLabel: "경기 신도시 입주",
     priceSeries: [
@@ -172,7 +172,7 @@ export const COMPARE_TOPICS: CompareTopic[] = [
     id: "changwon-supply",
     title: "지방도 똑같다 — 공급 바닥 칠 때 집값이 튀는 이유",
     regionTag: "창원 · 사례",
-    headline: "창원 매매지수 vs 입주물량",
+    headline: "창원도 똑같다\n공급↓ 가격↑",
     priceLabel: "매매지수",
     supplyLabel: "입주물량(지수)",
     priceSeries: [

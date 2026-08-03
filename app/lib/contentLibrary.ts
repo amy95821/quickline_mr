@@ -37,45 +37,45 @@ const DSR_STORY: TopicBlueprint = {
   buildSlides: () => [
     {
       layout: "hook",
-      headline: "DSR 3단계 강화",
-      subheadline: "누가 이기고, 누가 지나?",
+      headline: "빚 내서\n집 샀다?",
+      subheadline: "DSR 3단계 · 솔직히 누가 망하나",
       accent: "dark",
       slideIndex: 1,
       totalSlides: 5,
     },
     {
       layout: "story",
-      headline: "이기는 쪽",
+      headline: "전세·월세 사는 사람",
       body: [
-        "전세·월세로 거주하는 무주택자",
-        "주담대 한도와 무관, 주거비 고정",
-        "금리·규제 변동에도 월 부담 예측 가능",
+        "대출 한도랑 상관없음. 주거비 고정이면 끝",
+        "금리 올라도 월세만 내는 구조",
+        "규제 와도 '버티기'만 하면 됨",
       ],
-      highlight: "레버리지 없이 '버티는' 사람",
+      highlight: "레버리지 없는 사람이 이기는 시장",
       accent: "light",
       slideIndex: 2,
       totalSlides: 5,
     },
     {
       layout: "story",
-      headline: "지는 쪽",
+      headline: "갭투자·전세 끼고 산 사람",
       body: [
-        "갭투자·전세 끼고 매수하는 고레버리지",
-        "LTV·DSR 동시 축소 → 추가 대출 막힘",
-        "전세 만기·금리 상승 시 이중 부담",
+        "LTV·DSR 동시에 막힘 → 추가 대출 불가",
+        "전세 만기 + 금리 = 이중 타격",
+        "팔아도 손해, 안 팔아도 버거움",
       ],
-      highlight: "빚으로 버티던 사람",
+      highlight: "지금 제일 숨 막히는 쪽",
       accent: "light",
       slideIndex: 3,
       totalSlides: 5,
     },
     {
       layout: "story",
-      headline: "2040 현실 체크",
+      headline: "2040 월급쟁이 현실",
       body: [
-        "연봉 대비 DTI·DSR 여유 없으면 매수 미루기",
-        "전세→월세 전환 시 월 현금흐름 악화 주의",
-        "규제기에는 '타이밍'보다 '현금흐름'이 우선",
+        "연봉 대비 DSR 여유 없으면 매수 미루기",
+        "전세 깨지면 월세 전환 = 월급 새어나감",
+        "타이밍보다 '이번 달 통장'이 먼저",
       ],
       accent: "light",
       slideIndex: 4,
@@ -83,26 +83,27 @@ const DSR_STORY: TopicBlueprint = {
     },
     {
       layout: "insight",
-      headline: "결론",
+      headline: "솔직한 결론",
+      subheadline: "지금 집 사는 게 정답 아님",
       body: [
-        "DSR 강화기 = '빚 내서 사기' < '버티기'",
-        "무주택 기간·저축·전세 안정이 먼저",
+        "DSR 강화기 = 공격 매수 < 버티기",
+        "무주택·저축·전세 안정이 먼저",
       ],
-      highlight: "지금은 공격보다 방어가 이기는 시장",
+      highlight: "지금은 사지 말고, 버텨라",
       accent: "green",
       slideIndex: 5,
       totalSlides: 5,
     },
   ],
   buildCaption: (slides) => {
-    const hook = slides[0]?.headline ?? "DSR 3단계";
+    const hook = slides[0]?.headline?.replace("\n", " ") ?? "DSR 3단계";
     return [
-      `${hook}, 솔직히 누가 이기고 누가 지는지 정리해봤어요.`,
+      `${hook} — 솔직히 누가 이기고 누가 지는지 정리해봤어요.`,
       "",
-      "전세·월세로 사는 무주택자는 오히려 유리해요. 대출 한도랑 상관없이 주거비가 고정이니까요.",
+      "전세·월세로 사는 무주택자? 오히려 유리해요. 대출 한도랑 상관없이 주거비 고정이니까요.",
       "반면 갭투자·전세 끼고 매수하던 분들은 LTV·DSR 동시에 막혀서 숨 쉴 틈이 없어요.",
       "",
-      "2040 입장에선 지금 '타이밍'보다 '현금흐름'이 먼저예요.",
+      "2040 입장에선 '타이밍'보다 '이번 달 통장'이 먼저예요.",
       "무리한 대출 매수보다 전세 안정 + 저축이 이기는 구간입니다.",
       "",
       "👉 스와이프해서 이기는 쪽·지는 쪽 확인",
@@ -120,18 +121,18 @@ const MY_HOME_REALITY: TopicBlueprint = {
   buildSlides: () => [
     {
       layout: "insight",
-      headline: "내 집 마련?",
-      subheadline: "일단 원룸부터",
+      headline: "내 집 마련?\n일단 원룸부터",
+      subheadline: "2040 40%가 혼자 사는데",
       body: [
-        "2040 1인 가구 비율 40% 돌파",
-        "첫 목표는 '소유'가 아니라 '거주비 고정'",
-        "전세·월세 안정 → 저축 → 이후 매수 타이밍",
+        "첫 목표는 '아파트 소유'가 아님",
+        "전세·월세로 거주비 고정 → 저축 → 그다음",
+        "무리한 첫 매수 = DSR·금리에 발목",
       ],
-      highlight: "내 집 = 첫 집? 아니요. 첫 '거주 안정'이 먼저",
+      highlight: "내 집 = 첫 '거주 안정'이 먼저",
       winnersLosers: [
-        { side: "winner", label: "전세·월세 안정 후 저축", reason: "현금흐름 확보" },
-        { side: "loser", label: "무리한 첫 매수", reason: "DSR·금리 부담" },
-        { side: "neutral", label: "원룸 장기 거주", reason: "이사·전세 리스크↓" },
+        { side: "winner", label: "전세·월세 안정 후 저축", reason: "통장부터 살림" },
+        { side: "loser", label: "무리한 첫 매수", reason: "DSR·금리 지옥" },
+        { side: "neutral", label: "원룸 장기 거주", reason: "이사 스트레스↓" },
       ],
       accent: "dark",
     },
@@ -194,31 +195,31 @@ const JEONWOLSE_STORY: TopicBlueprint = {
   buildSlides: () => [
     {
       layout: "hook",
-      headline: "전세 vs 월세",
-      subheadline: "2040, 지금 어느 쪽?",
+      headline: "전세 깨지면\n월세 각오?",
+      subheadline: "2040, 지금 어느 쪽이 이득?",
       accent: "dark",
       slideIndex: 1,
       totalSlides: 4,
     },
     {
       layout: "story",
-      headline: "전세가 유리한 경우",
+      headline: "전세가 이득인 순간",
       body: [
         "목돈(보증금) 여유 있을 때",
-        "같은 평수 월 현금흐름 최소화",
-        "2년 이상 장기 거주 확정",
+        "2년 이상 안 이사할 각오",
+        "월세 24개월치 < 전세 보증금이면 GO",
       ],
-      highlight: "월세 × 24개월 < 전세 보증금 전환 시",
+      highlight: "월 현금흐름 최소화 = 전세",
       slideIndex: 2,
       totalSlides: 4,
     },
     {
       layout: "story",
-      headline: "월세가 유리한 경우",
+      headline: "월세가 이득인 순간",
       body: [
-        "목돈·대출 여력 부족",
-        "이직·이사 가능성 높음",
-        "전세 사기·보증금 리스크 회피",
+        "목돈·대출 여력 부족할 때",
+        "이직·이사 가능성 높을 때",
+        "전세 사기·보증금 리스크 피하고 싶을 때",
       ],
       highlight: "유동성 > 보증금 묶기",
       slideIndex: 3,
@@ -226,12 +227,13 @@ const JEONWOLSE_STORY: TopicBlueprint = {
     },
     {
       layout: "insight",
-      headline: "2040 결론",
+      headline: "정답은 하나",
+      subheadline: "남들 말 듣지 말 것",
       body: [
-        "전세가율 70%↑ → 전세 재검토",
-        "DSR 빠듯하면 월세 + 저축이 현실적",
+        "전세가율 70%↑ → 전세도 부담",
+        "DSR 빠듯하면 월세+저축이 현실",
       ],
-      highlight: "정답은 '내 현금흐름'에 맞는 쪽",
+      highlight: "내 통장에 맞는 쪽이 정답",
       accent: "green",
       slideIndex: 4,
       totalSlides: 4,
@@ -265,8 +267,8 @@ function buildEconomyCalendar(date: string): TopicBlueprint {
     buildSlides: () => [
       {
         layout: "calendar",
-        headline: `${m}월 재테크·경제 달력`,
-        subheadline: `${y}년 ${m}월 · 2040 필수 일정`,
+        headline: `${m}월,\n놓치면 손해`,
+        subheadline: "FOMC·청약·세금 마감 한 장에",
         month: m,
         year: y,
         source: `${y}.${String(m).padStart(2, "0")}.01 기준`,
@@ -321,8 +323,8 @@ const RATE_INSIGHT: TopicBlueprint = {
   buildSlides: () => [
     {
       layout: "chart",
-      headline: "미·한 금리, 지금 어디쯤?",
-      subheadline: "2021 → 2026 추이",
+      headline: "금리,\n아직 안 내려갔어",
+      subheadline: "미·한 2021→2026 추이",
       priceSeries: [
         { label: "21", value: 0.25 },
         { label: "22", value: 2.5 },
@@ -339,7 +341,7 @@ const RATE_INSIGHT: TopicBlueprint = {
       ],
       priceLabel: "미국 기준금리(%)",
       supplyLabel: "한국 기준금리(%)",
-      conclusion: "금리 피크 지남 → 대출 부담 완화 구간 진입, 다만 '저금리 시대' 회귀는 아님",
+      conclusion: "피크는 지났지만 '저금리 시대' 회귀는 아님 — 대출·전월세·투자 모두 금리 먼저 봐야 함",
       winnersLosers: [
         { side: "winner", label: "변동금리 대출자", reason: "이자 부담↓" },
         { side: "winner", label: "예·적금 가입자", reason: "금리 상대적 유리" },
@@ -370,19 +372,19 @@ const RETIRE_STORY: TopicBlueprint = {
   buildSlides: () => [
     {
       layout: "hook",
-      headline: "2040, 은퇴까지",
-      subheadline: "월 얼마 모아야 할까?",
+      headline: "65세에\n월 300만원?",
+      subheadline: "2040, 지금부터 얼마 모아야 하나",
       accent: "dark",
       slideIndex: 1,
       totalSlides: 4,
     },
     {
       layout: "story",
-      headline: "현실 숫자",
+      headline: "숫자로 보면 이렇게",
       body: [
-        "65세 은퇴 가정, 월 300만원 생활비",
-        "25년 × 12개월 = 9억 필요(물가 미반영)",
-        "국민연금만으론 월 100~150만원 수준",
+        "65세 은퇴, 월 300만원 생활 가정",
+        "25년이면 9억 필요 (물가 미반영)",
+        "국민연금만으론 월 100~150만원",
       ],
       highlight: "부족분 = 내가 채워야 할 돈",
       slideIndex: 2,
@@ -390,20 +392,20 @@ const RETIRE_STORY: TopicBlueprint = {
     },
     {
       layout: "story",
-      headline: "지금 할 수 있는 것",
+      headline: "오늘부터 할 수 있는 것",
       body: [
         "IRP·연금저축 세액공제 max",
         "월 50~100만원 자동이체",
-        "ETF·배당 혼합, 단일 종목 X",
+        "ETF·배당 혼합 (단일 종목 X)",
       ],
       slideIndex: 3,
       totalSlides: 4,
     },
     {
       layout: "insight",
-      headline: "결론",
-      highlight: "30대에 월 80만원 × 30년 = 3억+(복리)",
-      body: ["늦었다고 포기 X", "오늘부터 1만원이라도 자동이체"],
+      headline: "늦었다?\n아직 아님",
+      highlight: "30대 월 80만원 × 30년 = 3억+ (복리)",
+      body: ["오늘부터 1만원이라도 자동이체", "포기가 제일 비싼 선택"],
       accent: "green",
       slideIndex: 4,
       totalSlides: 4,
@@ -432,8 +434,8 @@ const HOUSING_POLICY: TopicBlueprint = {
   buildSlides: () => [
     {
       layout: "policy",
-      headline: "부동산 간담회",
-      subheadline: "국민 7,500건 의견, 3대 쟁점",
+      headline: "국회 부동산\n7,500건 민원",
+      subheadline: "2040한테 걸리는 건 이 3가지",
       source: "국토부 · 기재부 · 금융위",
       people: [
         { name: "국토부", role: "주택공급", stat: "2,381", statLabel: "건 (32%)" },
@@ -445,7 +447,7 @@ const HOUSING_POLICY: TopicBlueprint = {
         "금융: DSR·스트레스 DSR 강화",
         "세금: 종부세·취득세 개편 논의",
       ],
-      highlight: "2040 관심사 = 전세·청약·DSR, 세금은 간접 영향",
+      highlight: "2040 = 전세·청약·DSR이 핵심 (세금은 간접)",
       accent: "light",
     },
   ],
@@ -470,32 +472,32 @@ const DSR_POLICY_STORY: TopicBlueprint = {
   buildSlides: () => [
     {
       layout: "hook",
-      headline: "정부 DSR·주택정책",
-      subheadline: "2040, 나한테 뭐가 바뀌나?",
+      headline: "정부 DSR\n또 바뀐다",
+      subheadline: "2040, 나한테 뭐가 달라지나",
       accent: "dark",
       slideIndex: 1,
       totalSlides: 5,
     },
     {
       layout: "story",
-      headline: "바뀌는 것",
+      headline: "뭐가 바뀌나",
       body: [
         "스트레스 DSR 3단계 시행",
         "투기·과열지역 LTV 추가 축소",
-        "전세대출 한도·심사 강화",
+        "전세대출 한도·심사 더 빡세짐",
       ],
       slideIndex: 2,
       totalSlides: 5,
     },
     {
       layout: "story",
-      headline: "무주택·전세",
+      headline: "무주택·전세 거주",
       body: [
         "전세대출 심사 빡세짐 → 보증금 여력 필요",
-        "월세 전환 시 월 부담↑",
+        "전세→월세 밀릴 수 있음",
         "청약·무주택 기간은 그대로 유리",
       ],
-      highlight: "전세 → 월세 밀릴 수 있음",
+      highlight: "전세 계약 전에 대출 한도부터 확인",
       slideIndex: 3,
       totalSlides: 5,
     },
@@ -505,7 +507,7 @@ const DSR_POLICY_STORY: TopicBlueprint = {
       body: [
         "추가 대출 거의 불가",
         "갭투자·전세 끼고 매수 → 사실상 막힘",
-        "실수요·신혼은 일부 우대 유지",
+        "실수요·신혼만 일부 우대",
       ],
       slideIndex: 4,
       totalSlides: 5,
@@ -513,8 +515,8 @@ const DSR_POLICY_STORY: TopicBlueprint = {
     {
       layout: "insight",
       headline: "2040 액션",
-      highlight: "정책 따라 '매수'보다 '버티기' 전략",
-      body: ["무주택 기간·저축·전세 안정 우선", "급하게 집 사지 마세요"],
+      highlight: "정책 따라 '매수'보다 '버티기'",
+      body: ["무주택·저축·전세 안정 우선", "급매수는 손해 볼 확률↑"],
       accent: "green",
       slideIndex: 5,
       totalSlides: 5,
@@ -543,8 +545,8 @@ const APT_RANKING: TopicBlueprint = {
   buildSlides: () => [
     {
       layout: "ranking",
-      headline: "경기 국민평형 실거래",
-      subheadline: "TOP 7 · 32평 기준",
+      headline: "경기 32평\n실거래 TOP 7",
+      subheadline: "같은 평수, 3배 차이 난다",
       source: "국토부 실거래가 · '26.8.1 조회",
       rows: [
         { rank: 1, label: "판교", sub: "백현마을 2단지 32평", value: "28.0억", highlight: true },
@@ -555,7 +557,7 @@ const APT_RANKING: TopicBlueprint = {
         { rank: 6, label: "광교", sub: "광교 중흥 32평", value: "10.8억" },
         { rank: 7, label: "광명", sub: "광명역세권 32평", value: "9.5억" },
       ],
-      highlight: "같은 32평, 동네에 따라 3배 차이",
+      highlight: "판교 28억 vs 광명 9.5억 — 입지가 전부",
       accent: "dark",
     },
   ],
@@ -580,8 +582,8 @@ const BRAND_COMPARE: TopicBlueprint = {
   buildSlides: () => [
     {
       layout: "hook",
-      headline: "브랜드 프리미엄",
-      subheadline: "같은 동네, 2억 차이?",
+      headline: "같은 동네\n2억 차이?",
+      subheadline: "브랜드 프리미엄의 진실",
       accent: "dark",
       slideIndex: 1,
       totalSlides: 4,
@@ -589,20 +591,20 @@ const BRAND_COMPARE: TopicBlueprint = {
     {
       layout: "story",
       headline: "프리미엄 나는 브랜드",
-      body: ["대형 건설사 TOP 5", "입지·학군 동일 시 5~15% 차", "재건축·관리비·커뮤니티"],
+      body: ["대형 건설사 TOP 5", "입지·학군 같으면 5~15% 차", "재건축·관리비·커뮤니티"],
       slideIndex: 2,
       totalSlides: 4,
     },
     {
       layout: "story",
-      headline: "2040 체크리스트",
-      body: ["실거래가·전세가율", "입주물량·미분양", "역세권·학군 우선"],
+      headline: "2040이 볼 것",
+      body: ["실거래가·전세가율", "입주물량·미분양", "역세권·학군"],
       slideIndex: 3,
       totalSlides: 4,
     },
     {
       layout: "insight",
-      headline: "결론",
+      headline: "솔직히",
       highlight: "브랜드 < 입지 + 실거래",
       body: ["프리미엄만 보고 사면 손해", "실거래·전세가율 먼저"],
       accent: "green",
@@ -648,8 +650,8 @@ const ECONOMY_TAX: TopicBlueprint = {
     return [
       {
         layout: "insight",
-        headline: `${m}월 세금·공과금`,
-        subheadline: "2040 체크리스트",
+        headline: `${m}월 세금,\n놓치면 가산세`,
+        subheadline: "2040 필수 마감일",
         body: [
           "종합부동산세 · 9월 정기분 신고",
           "취득세 · 매수 후 60일 이내",
@@ -680,7 +682,7 @@ const ASSEMBLY_LAND: TopicBlueprint = {
   buildSlides: () => [
     {
       layout: "hook",
-      headline: "국회, 부동산법",
+      headline: "국회 부동산법\n통과?",
       subheadline: "2040한테 뭐가 바뀌나",
       accent: "dark",
       slideIndex: 1,
@@ -712,8 +714,8 @@ const ASSEMBLY_LAND: TopicBlueprint = {
     },
     {
       layout: "insight",
-      headline: "결론",
-      highlight: "법안 통과 ≠ 즉시 체감, 시행일·시행령 확인",
+      headline: "법안 통과\n≠ 바로 체감",
+      highlight: "시행일·시행령 확인이 핵심",
       body: ["전세 계약 전 등기·확정일자", "대출은 규제 전후 비교"],
       accent: "green",
       slideIndex: 4,
@@ -739,8 +741,8 @@ const TAX_REFORM: TopicBlueprint = {
   buildSlides: () => [
     {
       layout: "policy",
-      headline: "세제개편안",
-      subheadline: "7월 중 발표 예정",
+      headline: "세제개편\n7월 나온다",
+      subheadline: "2040, 급하게 움직이지 말 것",
       people: [
         { name: "기재부", role: "종부세", stat: "강화", statLabel: "다주택" },
         { name: "기재부", role: "취득세", stat: "LTV", statLabel: "연계" },
@@ -774,8 +776,8 @@ const SEOUL_APT_RANKING: TopicBlueprint = {
   buildSlides: () => [
     {
       layout: "ranking",
-      headline: "서울 국민평형 실거래",
-      subheadline: "TOP 7 · 32평",
+      headline: "서울 32평\n실거래 TOP 7",
+      subheadline: "강남 35억 vs 성동 16억",
       source: "국토부 실거래가",
       rows: [
         { rank: 1, label: "강남", sub: "대치동 아파트 32평", value: "35.2억", highlight: true },
@@ -806,8 +808,8 @@ const BRAND_CHECKLIST: TopicBlueprint = {
   buildSlides: () => [
     {
       layout: "insight",
-      headline: "브랜드 고를 때",
-      subheadline: "2040 체크리스트",
+      headline: "브랜드만\n믿지 마",
+      subheadline: "2040 아파트 고를 때 5가지",
       body: [
         "① 실거래가·전세가율 (네이버·국토부)",
         "② 입주물량·미분양 (공급 압력)",

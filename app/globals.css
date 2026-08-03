@@ -2,29 +2,40 @@
 
 @import "tailwindcss";
 
+/* 카드 전용 — 흔한 마케팅 폰트 대신 에디토리얼 조합 */
 @font-face {
-  font-family: "GmarketSans";
-  font-weight: 700;
+  font-family: "RIDIBatang";
+  font-weight: 400;
   font-style: normal;
   font-display: swap;
-  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.woff")
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_twelve@1.0/RIDIBatang.woff")
     format("woff");
 }
 
 @font-face {
-  font-family: "GmarketSans";
-  font-weight: 500;
+  font-family: "MaruBuri";
+  font-weight: 400;
   font-style: normal;
   font-display: swap;
-  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff")
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@2.1/MaruBuriRegular.woff")
+    format("woff");
+}
+
+@font-face {
+  font-family: "MaruBuri";
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@2.1/MaruBuriBold.woff")
     format("woff");
 }
 
 :root {
   --font-pretendard: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --font-gmarket: "GmarketSans", "Pretendard", sans-serif;
-  --background: #eef6ff;
-  --foreground: #0d2137;
+  --font-display: "RIDIBatang", "Georgia", "Times New Roman", serif;
+  --font-body: "MaruBuri", var(--font-pretendard);
+  --background: #f5f2ec;
+  --foreground: #1a1a1a;
 }
 
 body {
@@ -33,6 +44,12 @@ body {
   font-family: var(--font-pretendard);
 }
 
-.font-card {
-  font-family: var(--font-gmarket);
+.font-card-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+}
+
+.font-card-body {
+  font-family: var(--font-body);
+  font-weight: 400;
 }

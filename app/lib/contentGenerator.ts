@@ -1,6 +1,7 @@
 import type { CardSlide, GeneratedContent } from "./cardTypes";
 import { buildBrightCaption } from "./captionTone";
-import { buildHashtags } from "./hashtags";import { findBlueprint, type SuggestedTopic } from "./topicSuggester";
+import { buildHashtags } from "./hashtags";
+import { findBlueprint, type SuggestedTopic } from "./topicSuggester";
 import { analyzeUnsold, MOCK_UNSOLD_ROWS } from "./unsoldParser";
 
 function buildUnsoldSlides(region: string): CardSlide[] {
@@ -8,8 +9,8 @@ function buildUnsoldSlides(region: string): CardSlide[] {
   return [
     {
       layout: "unsold",
-      headline: `${region} 미분양 TOP 3`,
-      subheadline: "정부 공시 기준 · 미분양률 순",
+      headline: `${region}\n미분양 1위 어디?`,
+      subheadline: "분양·입주 타이밍 주의",
       region,
       topRegions: top.map((t) => ({
         name: t.district,
@@ -79,7 +80,7 @@ export function generateUnsoldFromUpload(
   const slides: CardSlide[] = [
     {
       layout: "unsold",
-      headline: `${region} 미분양 TOP 3`,
+      headline: `${region}\n미분양 1위 어디?`,
       subheadline: "업로드 데이터 기준",
       region,
       topRegions: top.map((t) => ({

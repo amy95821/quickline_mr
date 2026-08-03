@@ -3,13 +3,18 @@
 import type { CSSProperties, ReactNode } from "react";
 import type { CardSlide, ChartPoint, WinnerLoser } from "../lib/cardTypes";
 import { BRAND_HANDLE } from "../lib/cardTypes";
-import { C, GRAD, CARD_FONT_FAMILY } from "../lib/designTokens";
+import { C, FONT_BODY, FONT_DISPLAY } from "../lib/designTokens";
 
 interface InstaCardPreviewProps {
   slide: CardSlide;
 }
 
-/** 인스타 카드(정사각) 전용 루트 — 폰트·비율 고정 */
+function seed(data: CardSlide): number {
+  let h = data.slideIndex ?? 1;
+  for (const c of data.headline) h = (h * 31 + c.charCodeAt(0)) | 0;
+  return Math.abs(h);
+}
+
 function CardRoot({
   children,
   style,
@@ -22,11 +27,44 @@ function CardRoot({
   return (
     <div
       className={"relative flex aspect-square w-full flex-col overflow-hidden " + className}
-      style={{ fontFamily: CARD_FONT_FAMILY, fontWeight: 700, ...style }}
+      style={{ fontFamily: FONT_BODY, color: C.ink, ...style }}
     >
       {children}
     </div>
   );
+}
+
+function Display({
+  children,
+  as: Tag = "h2",
+  className = "",
+  style,
+}: {
+  children: ReactNode;
+  as?: "h1" | "h2" | "p" | "span";
+  className?: string;
+  style?: CSSProperties;
+}) {
+  return (
+    <Tag
+      className={className}
+      style={{ fontFamily: FONT_DISPLAY, fontWeight: 400, letterSpacing: "-0.02em", ...style }}
+    >
+      {children}
+    </Tag>
+  );
+}
+
+function Body({ children, className = "", style }: { children: ReactNode; className?: string; style?: CSSProperties }) {
+  return (
+    <p className={"leading-[1.65] " + className} style={{ fontFamily: FONT_BODY, ...style }}>
+      {children}
+    </p>
+  );
+}
+
+function Rule({ w = "w-16", className = "" }: { w?: string; className?: string }) {
+  return <div className={"h-[2px] bg-[#1A1A1A] " + w + " " + className} />;
 }
 
 export function InstaCardPreview({ slide }: InstaCardPreviewProps) {
@@ -54,97 +92,138 @@ export function InstaCardPreview({ slide }: InstaCardPreviewProps) {
 
 function BrandMark() {
   return (
-    <span className="absolute bottom-4 right-5 text-[9px] font-bold tracking-wide text-[#1565C0]/40">
+    <span
+      className="absolute bottom-5 right-6 text-[8px] tracking-[0.2em] text-black/30"
+      style={{ fontFamily: FONT_BODY }}
+    >
       {BRAND_HANDLE}
     </span>
   );
 }
 
-function SourceLine({ text }: { text?: string }) {
-  if (!text) return null;
-  return <p className="text-[8px] font-medium leading-relaxed text-white/70">{text}</p>;
-}
-
-function SourceLineDark({ text }: { text?: string }) {
-  if (!text) return null;
-  return <p className="text-[8px] font-medium leading-relaxed text-[#1565C0]/50">{text}</p>;
-}
-
-function HighlightBox({
-  text,
-  variant = "blue",
-}: {
-  text: string;
-  variant?: "blue" | "green";
-}) {
-  const bg = variant === "green" ? GRAD.highlightGreen : GRAD.highlightBlue;
-  return (
-    <div
-      className="mt-3 rounded-xl px-3 py-2.5 text-[13px] leading-snug text-white shadow-lg"
-      style={{ background: bg }}
-    >
-      {text}
-    </div>
-  );
-}
-
-function WinnerLoserList({ items }: { items?: WinnerLoser[] }) {
+function WinnerLoserList({ items }: { items?: WinnerLoser[]; invert?: boolean }) {
   if (!items?.length) return null;
-  const colors = { winner: C.greenDeep, loser: C.coral, neutral: C.blueDeep };
-  const labels = { winner: "WIN", loser: "LOSE", neutral: "·" };
   return (
-    <ul className="mt-3 space-y-1.5">
+    <ul className="mt-4 space-y-2">
       {items.map((w, i) => (
-        <li key={i} className="flex gap-2 text-[12px] leading-snug">
-          <span
-            className="shrink-0 rounded px-1 text-[9px] font-bold text-white"
-            style={{ backgroundColor: colors[w.side] }}
-          >
-            {labels[w.side]}
+        <li key={i} className="text-[12px] leading-[1.55]">
+          <span className="mr-1.5 text-[10px] text-black/35">
+            {w.side === "winner" ? "↑" : w.side === "loser" ? "↓" : "·"}
           </span>
-          <span className="text-[#0D2137]">
-            <strong>{w.label}</strong>
-            <span className="text-[#1565C0]/70"> — {w.reason}</span>
-          </span>
+          {w.label}
+          <span className="text-black/45"> — {w.reason}</span>
         </li>
       ))}
     </ul>
   );
 }
 
+/** 표지 — 종이 질감, 제목 좌하단 치우침 */
 function HookSlide({ data }: { data: CardSlide }) {
+  const s = seed(data);
   return (
-    <CardRoot className="justify-end text-white" style={{ background: GRAD.hook }}>
-      <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/15" />
-      <div className="absolute -bottom-4 -left-4 h-24 w-24 rounded-full bg-[#69F0AE]/40" />
-      <div className="relative px-8 pb-16 pt-10">
-        <h1 className="text-[30px] leading-[1.12] tracking-tight drop-shadow-md">{data.headline}</h1>
-        {data.subheadline && (
-          <p className="mt-3 text-[17px] leading-snug text-white/95">{data.subheadline}</p>
-        )}
+    <CardRoot className="bg-[#F4F0E8]">
+      <div
+        className="absolute right-6 top-8 max-w-[42%] text-right text-[11px] leading-[1.5] text-black/50"
+        style={{ fontFamily: FONT_BODY }}
+      >
+        {data.subheadline}
+      </div>
+      <div className="absolute left-0 top-[38%] h-px w-[72%] bg-black/80" />
+      <div className="flex flex-1 flex-col justify-end pb-16 pl-8 pr-10 pt-6">
+        <Display as="h1" className="whitespace-pre-line text-[34px] leading-[1.05]">
+          {data.headline}
+        </Display>
+        <Rule w="w-10" className="mt-5" />
+        <Body className="mt-3 text-[11px] text-black/40">
+          {(s % 3) + 2}분 읽기
+        </Body>
       </div>
       <BrandMark />
     </CardRoot>
   );
 }
 
+/** 본문 — 3가지 비대칭 레이아웃, 번호·박스 템플릿 없음 */
 function StorySlide({ data }: { data: CardSlide }) {
+  const s = seed(data) % 3;
+
+  if (s === 0) {
+    return (
+      <CardRoot className="bg-white">
+        <div className="flex flex-1 pb-16 pl-6 pr-8 pt-12">
+          <div className="mr-4 w-8 shrink-0 pt-1">
+            <Display as="span" className="text-[42px] leading-none text-black/15">
+              {data.slideIndex ?? ""}
+            </Display>
+          </div>
+          <div className="min-w-0 flex-1">
+            <Display className="text-[26px] leading-[1.15]">{data.headline}</Display>
+            <div className="mt-6 space-y-4">
+              {data.body?.map((line, i) => (
+                <Body key={i} className="text-[14px]">
+                  {line}
+                </Body>
+              ))}
+            </div>
+            {data.highlight && (
+              <Body className="mt-6 border-t border-black/15 pt-4 text-[13px] italic text-black/70">
+                {data.highlight}
+              </Body>
+            )}
+          </div>
+        </div>
+        <BrandMark />
+      </CardRoot>
+    );
+  }
+
+  if (s === 1) {
+    return (
+      <CardRoot className="bg-[#1A1A1A] text-[#F4F0E8]">
+        <div className="px-9 pb-16 pt-14">
+          <Body className="text-[10px] tracking-[0.25em] text-white/40">NOTE</Body>
+          <Display as="h2" className="mt-3 text-[28px] leading-[1.12] text-white">
+            {data.headline}
+          </Display>
+          <Rule w="w-full" className="mt-5 bg-white/30" />
+          <div className="mt-7 space-y-5">
+            {data.body?.map((line, i) => (
+              <Body key={i} className="text-[14px] text-white/88" style={{ paddingLeft: i % 2 ? 16 : 0 }}>
+                {line}
+              </Body>
+            ))}
+          </div>
+          {data.highlight && (
+            <Body className="mt-8 text-[13px] text-[#D4A017]">{data.highlight}</Body>
+          )}
+        </div>
+        <BrandMark />
+      </CardRoot>
+    );
+  }
+
   return (
-    <CardRoot className="text-[#0D2137]" style={{ background: GRAD.cardBg }}>
-      <div className="h-2 w-full" style={{ background: GRAD.header }} />
-      <div className="flex flex-1 flex-col px-7 pb-14 pt-8">
-        <h2 className="text-[24px] leading-tight text-[#1565C0]">{data.headline}</h2>
-        <ul className="mt-5 flex-1 space-y-3">
+    <CardRoot className="bg-[#FAF8F4]">
+      <Display
+        as="h2"
+        className="absolute right-6 top-10 max-w-[55%] text-right text-[22px] leading-[1.2]"
+      >
+        {data.headline}
+      </Display>
+      <div className="mt-32 flex flex-1 flex-col px-8 pb-16">
+        <div className="space-y-3 border-l-2 border-black pl-5">
           {data.body?.map((line, i) => (
-            <li
-              key={i}
-              className="rounded-xl border border-[#42A5F5]/20 bg-white/85 px-3 py-2.5 text-[14px] leading-[1.5] shadow-sm"
-            >
+            <Body key={i} className="text-[14px]">
               {line}
-            </li>
+            </Body>
           ))}
-        </ul>
-        {data.highlight && <HighlightBox text={data.highlight} variant="green" />}
+        </div>
+        {data.highlight && (
+          <Display as="p" className="mt-auto pt-8 text-[18px] leading-snug text-[#3D6B4F]">
+            &ldquo;{data.highlight}&rdquo;
+          </Display>
+        )}
       </div>
       <BrandMark />
     </CardRoot>
@@ -152,36 +231,86 @@ function StorySlide({ data }: { data: CardSlide }) {
 }
 
 function InsightSlide({ data }: { data: CardSlide }) {
-  const vivid = data.accent === "dark" || data.accent === "green";
+  if (data.accent === "dark") {
+    return (
+      <CardRoot className="bg-[#1E3A5F] text-[#F4F0E8]">
+        <div className="flex flex-1 flex-col px-8 pb-16 pt-12">
+          {data.subheadline && (
+            <Body className="text-[11px] text-white/45">{data.subheadline}</Body>
+          )}
+          <Display as="h2" className="mt-2 whitespace-pre-line text-[30px] leading-[1.08] text-white">
+            {data.headline}
+          </Display>
+          {data.body && (
+            <div className="mt-6 space-y-3">
+              {data.body.map((line, i) => (
+                <Body key={i} className="text-[14px] text-white/82">
+                  {line}
+                </Body>
+              ))}
+            </div>
+          )}
+          {data.highlight && (
+            <Display as="p" className="mt-auto pt-6 text-[20px] leading-[1.35] text-[#D4A017]">
+              {data.highlight}
+            </Display>
+          )}
+          <WinnerLoserList items={data.winnersLosers} />
+        </div>
+        <BrandMark />
+      </CardRoot>
+    );
+  }
+
+  if (data.accent === "green") {
+    return (
+      <CardRoot className="bg-white">
+        <div className="flex flex-1 flex-col px-7 pb-14 pt-10">
+          <Display className="whitespace-pre-line text-[28px] leading-[1.1]">{data.headline}</Display>
+          {data.body && (
+            <div className="mt-5 space-y-2.5">
+              {data.body.map((line, i) => (
+                <Body key={i} className="text-[14px] text-black/75">
+                  {line}
+                </Body>
+              ))}
+            </div>
+          )}
+          {data.highlight && (
+            <div className="mt-auto bg-[#3D6B4F] px-5 py-5">
+              <Display as="p" className="text-[17px] leading-[1.4] text-[#F4F0E8]">
+                {data.highlight}
+              </Display>
+            </div>
+          )}
+        </div>
+        <BrandMark />
+      </CardRoot>
+    );
+  }
+
   return (
-    <CardRoot
-      className={vivid ? "text-white" : "text-[#0D2137]"}
-      style={{ background: vivid ? GRAD.hook : GRAD.cardBg }}
-    >
-      {!vivid && <div className="h-2 w-full" style={{ background: GRAD.header }} />}
-      <div className="flex flex-1 flex-col px-7 pb-14 pt-8">
+    <CardRoot className="bg-[#F4F0E8]">
+      <div className="flex flex-1 flex-col px-8 pb-16 pt-11">
         {data.subheadline && (
-          <p className={`text-[13px] ${vivid ? "text-white/80" : "text-[#2196F3]"}`}>
-            {data.subheadline}
-          </p>
+          <Body className="text-[11px] text-black/45">{data.subheadline}</Body>
         )}
-        <h2 className="mt-1 text-[26px] leading-tight">{data.headline}</h2>
+        <Display className="mt-1 whitespace-pre-line text-[26px] leading-[1.12]">
+          {data.headline}
+        </Display>
         {data.body && (
-          <ul className="mt-4 space-y-2">
+          <div className="mt-5 space-y-3">
             {data.body.map((line, i) => (
-              <li
-                key={i}
-                className={`text-[14px] leading-[1.55] ${vivid ? "text-white/95" : ""}`}
-              >
-                {line}
-              </li>
+              <Body key={i} className="text-[13px]">
+                — {line}
+              </Body>
             ))}
-          </ul>
+          </div>
         )}
         {data.highlight && (
-          <HighlightBox text={data.highlight} variant={vivid ? "green" : "blue"} />
+          <Body className="mt-6 text-[14px] font-bold">{data.highlight}</Body>
         )}
-        {!vivid && <WinnerLoserList items={data.winnersLosers} />}
+        <WinnerLoserList items={data.winnersLosers} />
       </div>
       <BrandMark />
     </CardRoot>
@@ -190,10 +319,10 @@ function InsightSlide({ data }: { data: CardSlide }) {
 
 const EVENT_COLORS: Record<string, string> = {
   tax: C.blueDeep,
-  policy: C.greenDeep,
+  policy: C.green,
   supply: C.blue,
   rate: C.coral,
-  general: "#78909C",
+  general: C.gray,
 };
 
 function CalendarSlide({ data }: { data: CardSlide }) {
@@ -213,20 +342,23 @@ function CalendarSlide({ data }: { data: CardSlide }) {
   for (let d = 1; d <= daysInMonth; d++) cells.push(d);
 
   return (
-    <CardRoot className="bg-white text-[#0D2137]">
-      <div className="px-5 py-4 text-white" style={{ background: GRAD.header }}>
-        <SourceLine text={data.source ?? `* ${year}년 ${month}월 ver.`} />
-        <h1 className="mt-1 text-[20px] leading-tight">{data.headline}</h1>
+    <CardRoot className="bg-white">
+      <div className="px-6 pb-3 pt-8">
+        <Body className="text-[9px] text-black/35">{data.source ?? `${year}.${month}`}</Body>
+        <Display as="h1" className="mt-1 whitespace-pre-line text-[24px] leading-[1.1]">
+          {data.headline}
+        </Display>
         {data.subheadline && (
-          <p className="mt-0.5 text-[11px] font-medium text-white/80">{data.subheadline}</p>
+          <Body className="mt-2 text-[12px] text-[#2B5F8C]">{data.subheadline}</Body>
         )}
       </div>
-      <div className="flex flex-1 flex-col px-3 pb-12 pt-3">
-        <div className="grid grid-cols-7 gap-px overflow-hidden rounded-lg bg-[#2196F3]/20 text-[8px]">
+      <div className="flex flex-1 flex-col px-4 pb-12 pt-2">
+        <div className="grid grid-cols-7 gap-px bg-black/8 text-[7.5px]">
           {["일", "월", "화", "수", "목", "금", "토"].map((d, i) => (
             <div
               key={d}
-              className={`bg-[#E3F2FD] py-1.5 text-center font-bold ${i === 0 ? "text-red-500" : i === 6 ? "text-[#2196F3]" : "text-[#1565C0]"}`}
+              className={"bg-[#FAF8F4] py-1 text-center " + (i === 0 ? "text-red-600" : "")}
+              style={{ fontFamily: FONT_BODY }}
             >
               {d}
             </div>
@@ -235,18 +367,16 @@ function CalendarSlide({ data }: { data: CardSlide }) {
             const ev = day ? eventMap.get(day) : null;
             const dow = i % 7;
             const bg = ev ? EVENT_COLORS[ev.type ?? "general"] : "#fff";
-            const fg = ev ? "#fff" : dow === 0 ? "#ef4444" : dow === 6 ? C.blue : C.ink;
+            const fg = ev ? "#fff" : dow === 0 ? "#c0392b" : C.ink;
             return (
               <div
                 key={i}
-                className="flex min-h-[36px] flex-col p-0.5"
-                style={{ backgroundColor: ev ? bg : "#fff", color: fg }}
+                className="flex min-h-[34px] flex-col p-0.5"
+                style={{ backgroundColor: ev ? bg : "#fff", color: fg, fontFamily: FONT_BODY }}
               >
-                {day && <span className="text-[9px] font-bold">{day}</span>}
+                {day && <span className="text-[8px]">{day}</span>}
                 {ev && day === ev.day && (
-                  <span className="mt-auto line-clamp-3 text-[6.5px] font-bold leading-tight">
-                    {ev.label}
-                  </span>
+                  <span className="mt-auto line-clamp-3 text-[6px] leading-tight">{ev.label}</span>
                 )}
               </div>
             );
@@ -263,24 +393,24 @@ function LineChart({ series, color, label }: { series: ChartPoint[]; color: stri
   const min = Math.min(...series.map((p) => p.value));
   const range = max - min || 1;
   const w = 280;
-  const h = 56;
+  const h = 52;
   const pts = series.map((p, i) => {
     const x = (i / Math.max(series.length - 1, 1)) * w;
-    const y = h - ((p.value - min) / range) * (h - 10) - 5;
-    return { x, y, v: p.value, l: p.label };
+    const y = h - ((p.value - min) / range) * (h - 8) - 4;
+    return { x, y, v: p.value };
   });
   const line = pts.map((p) => `${p.x},${p.y}`).join(" ");
 
   return (
-    <div className="mb-2 rounded-xl bg-white/80 p-2 shadow-sm">
+    <div className="mb-3 border-t border-black/20 pt-2">
       <div className="mb-1 flex items-baseline justify-between">
-        <span className="text-[11px] font-bold text-[#1565C0]">{label}</span>
-        <span className="text-[10px] font-bold tabular-nums" style={{ color }}>
+        <Body className="text-[10px] text-black/50">{label}</Body>
+        <span className="text-[11px] tabular-nums" style={{ color, fontFamily: FONT_BODY }}>
           {pts[pts.length - 1]?.v}
         </span>
       </div>
       <svg viewBox={`0 0 ${w} ${h}`} className="w-full" aria-hidden>
-        <polyline points={line} fill="none" stroke={color} strokeWidth="3" strokeLinecap="round" />
+        <polyline points={line} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" />
       </svg>
     </div>
   );
@@ -288,22 +418,28 @@ function LineChart({ series, color, label }: { series: ChartPoint[]; color: stri
 
 function ChartSlide({ data }: { data: CardSlide }) {
   return (
-    <CardRoot className="text-[#0D2137]" style={{ background: GRAD.cardBg }}>
-      <div className="px-5 py-4 text-white" style={{ background: GRAD.header }}>
-        <SourceLine text={data.source} />
-        <h2 className="mt-1 text-[17px] font-bold leading-snug">{data.headline}</h2>
+    <CardRoot className="bg-[#FAF8F4]">
+      <div className="px-7 pb-4 pt-9">
+        {data.source && <Body className="text-[8px] text-black/35">{data.source}</Body>}
+        <Display className="mt-1 whitespace-pre-line text-[22px] leading-[1.12]">
+          {data.headline}
+        </Display>
         {data.subheadline && (
-          <p className="mt-0.5 text-[11px] font-medium text-white/80">{data.subheadline}</p>
+          <Body className="mt-2 text-[12px] text-[#2B5F8C]">{data.subheadline}</Body>
         )}
       </div>
-      <div className="flex flex-1 flex-col px-4 pb-14 pt-3">
+      <div className="flex flex-1 flex-col px-7 pb-14">
         {data.priceSeries && data.priceLabel && (
           <LineChart series={data.priceSeries} color={C.blue} label={data.priceLabel} />
         )}
         {data.supplySeries && data.supplyLabel && (
           <LineChart series={data.supplySeries} color={C.green} label={data.supplyLabel} />
         )}
-        {data.conclusion && <HighlightBox text={data.conclusion} variant="green" />}
+        {data.conclusion && (
+          <Display as="p" className="mt-3 text-[15px] leading-[1.45]">
+            {data.conclusion}
+          </Display>
+        )}
         <WinnerLoserList items={data.winnersLosers} />
       </div>
       <BrandMark />
@@ -313,40 +449,44 @@ function ChartSlide({ data }: { data: CardSlide }) {
 
 function RankingSlide({ data }: { data: CardSlide }) {
   return (
-    <CardRoot className="bg-white text-[#0D2137]">
-      <div className="px-5 py-4 text-white" style={{ background: GRAD.header }}>
-        <SourceLine text={data.source} />
-        <h2 className="mt-1 text-[18px] font-bold">{data.headline}</h2>
-        {data.subheadline && <p className="text-[11px] font-medium text-white/80">{data.subheadline}</p>}
+    <CardRoot className="bg-white">
+      <div className="px-7 pb-4 pt-9">
+        {data.source && <Body className="text-[8px] text-black/35">{data.source}</Body>}
+        <Display className="whitespace-pre-line text-[26px] leading-[1.08]">{data.headline}</Display>
+        {data.subheadline && (
+          <Body className="mt-2 text-[13px] text-[#C0392B]">{data.subheadline}</Body>
+        )}
       </div>
-      <ul className="flex-1 overflow-hidden">
+      <ul className="flex-1 px-5 pb-4">
         {data.rows?.map((row, i) => (
           <li
             key={row.rank}
-            className={`flex items-center gap-2 border-b border-[#2196F3]/10 px-4 py-2.5 ${i % 2 ? "bg-[#E3F2FD]/50" : ""}`}
+            className="border-b border-black/10 py-3"
+            style={{ paddingLeft: i % 2 === 0 ? 0 : 12 }}
           >
-            <span className="w-5 text-[12px] font-bold tabular-nums text-[#2196F3]">{row.rank}</span>
-            <span
-              className="min-w-[44px] rounded-md px-2 py-1 text-[10px] font-bold text-white"
-              style={{ background: GRAD.highlightBlue }}
-            >
-              {row.label}
-            </span>
-            <div className="min-w-0 flex-1">
-              {row.sub && <p className="truncate text-[10px] font-medium text-[#1565C0]/60">{row.sub}</p>}
+            <div className="flex items-baseline gap-3">
+              <Display as="span" className="w-8 text-[28px] leading-none tabular-nums text-black/20">
+                {row.rank}
+              </Display>
+              <div className="min-w-0 flex-1">
+                <Body className="text-[14px] font-bold">{row.label}</Body>
+                {row.sub && <Body className="text-[10px] text-black/40">{row.sub}</Body>}
+              </div>
+              <Body
+                className={
+                  "text-[15px] tabular-nums " + (row.highlight ? "text-[#C0392B]" : "")
+                }
+              >
+                {row.value}
+              </Body>
             </div>
-            <span
-              className={`text-[14px] font-bold tabular-nums ${row.highlight ? "text-[#00C853]" : "text-[#1565C0]"}`}
-            >
-              {row.value}
-            </span>
           </li>
         ))}
       </ul>
       {data.highlight && (
-        <div className="mx-4 mb-10">
-          <HighlightBox text={data.highlight} variant="blue" />
-        </div>
+        <Body className="mx-7 mb-12 border-t border-black pt-3 text-[12px] italic">
+          {data.highlight}
+        </Body>
       )}
       <BrandMark />
     </CardRoot>
@@ -355,48 +495,48 @@ function RankingSlide({ data }: { data: CardSlide }) {
 
 function PolicySlide({ data }: { data: CardSlide }) {
   return (
-    <CardRoot className="text-[#0D2137]" style={{ background: GRAD.cardBg }}>
-      <div className="border-b-4 border-[#00C853] px-5 py-3">
-        <SourceLineDark text={data.source} />
-        <h2 className="text-[18px] font-bold leading-tight text-[#1565C0]">{data.headline}</h2>
+    <CardRoot className="bg-[#F4F0E8]">
+      <div className="border-b border-black px-7 py-5">
+        {data.source && <Body className="text-[8px] text-black/35">{data.source}</Body>}
+        <Display className="whitespace-pre-line text-[24px] leading-[1.1]">{data.headline}</Display>
         {data.subheadline && (
-          <p className="mt-0.5 text-[12px] font-bold text-[#00C853]">{data.subheadline}</p>
+          <Body className="mt-2 text-[13px]">{data.subheadline}</Body>
         )}
       </div>
-      <div className="grid flex-1 grid-cols-3 gap-2 px-3 pb-4 pt-3">
-        {data.people?.map((p) => (
-          <div key={p.name} className="flex flex-col overflow-hidden rounded-xl bg-white shadow-sm">
-            <div className="flex h-14 items-center justify-center bg-gradient-to-br from-[#E3F2FD] to-[#E8F8F5]">
-              <div
-                className="flex h-10 w-10 items-center justify-center rounded-full text-[14px] font-bold text-white"
-                style={{ background: GRAD.highlightBlue }}
-              >
-                {p.name.slice(0, 1)}
-              </div>
+      <div className="flex flex-1 flex-col gap-3 px-6 py-4">
+        {data.people?.map((p, i) => (
+          <div
+            key={p.name}
+            className="flex items-center gap-4 border-b border-black/10 pb-3"
+            style={{ marginLeft: i * 8 }}
+          >
+            <Display as="span" className="text-[32px] leading-none text-black/15">
+              {String(i + 1).padStart(2, "0")}
+            </Display>
+            <div className="flex-1">
+              <Body className="text-[13px] font-bold">{p.name}</Body>
+              <Body className="text-[10px] text-black/45">{p.role}</Body>
             </div>
-            <div className="bg-[#1565C0] px-1 py-1 text-center text-[8px] font-bold text-white">
-              {p.role}
-            </div>
-            <div className="flex flex-1 flex-col items-center justify-center p-2 text-center">
-              <p className="text-[18px] font-bold tabular-nums text-[#00C853]">{p.stat}</p>
-              <p className="text-[8px] font-medium text-[#1565C0]/60">{p.statLabel}</p>
+            <div className="text-right">
+              <Display as="span" className="text-[22px] tabular-nums text-[#C0392B]">
+                {p.stat}
+              </Display>
+              <Body className="text-[8px] text-black/40">{p.statLabel}</Body>
             </div>
           </div>
         ))}
       </div>
       {data.body && (
-        <ul className="space-y-1 px-5 pb-2">
+        <ul className="space-y-1 px-7 pb-2">
           {data.body.map((line, i) => (
-            <li key={i} className="text-[11px] font-medium leading-snug">
-              · {line}
-            </li>
+            <Body key={i} className="text-[11px]">
+              {line}
+            </Body>
           ))}
         </ul>
       )}
       {data.highlight && (
-        <div className="mx-4 mb-10">
-          <HighlightBox text={data.highlight} variant="green" />
-        </div>
+        <Body className="mx-7 mb-12 text-[12px] italic leading-[1.5]">{data.highlight}</Body>
       )}
       <BrandMark />
     </CardRoot>
@@ -405,41 +545,40 @@ function PolicySlide({ data }: { data: CardSlide }) {
 
 function UnsoldSlide({ data }: { data: CardSlide }) {
   return (
-    <CardRoot className="bg-white text-[#0D2137]">
-      <div className="px-5 py-4 text-white" style={{ background: GRAD.header }}>
-        <SourceLine text={data.source} />
-        <h2 className="mt-1 text-[18px] font-bold">{data.headline}</h2>
-        {data.subheadline && <p className="text-[11px] font-medium text-white/80">{data.subheadline}</p>}
+    <CardRoot className="bg-white">
+      <div className="px-7 pb-5 pt-9">
+        {data.source && <Body className="text-[8px] text-black/35">{data.source}</Body>}
+        <Display className="whitespace-pre-line text-[26px] leading-[1.08]">{data.headline}</Display>
+        {data.subheadline && <Body className="mt-2 text-[12px]">{data.subheadline}</Body>}
       </div>
-      <ul className="flex-1 space-y-0 px-4 pb-4 pt-4">
+      <ul className="flex-1 px-7 pb-4">
         {data.topRegions?.map((r, i) => (
-          <li key={r.name} className="border-b border-[#2196F3]/10 py-3">
-            <div className="flex items-end justify-between">
-              <div className="flex items-baseline gap-2">
-                <span className="text-[14px] font-bold text-[#2196F3]">{i + 1}</span>
-                <span className="text-[15px] font-bold">{r.name}</span>
+          <li key={r.name} className="border-t border-black/15 py-4">
+            <div className="flex items-end justify-between gap-2">
+              <div>
+                <Display as="span" className="text-[36px] leading-none text-black/12">
+                  {i + 1}
+                </Display>
+                <Body className="mt-1 text-[15px] font-bold">{r.name}</Body>
+                <Body className="text-[10px] text-black/40">
+                  미분양 {r.count.toLocaleString()}호
+                </Body>
               </div>
-              <span className="text-[16px] font-bold tabular-nums text-[#FF6B6B]">{r.rate}</span>
+              <Display as="span" className="text-[24px] tabular-nums text-[#C0392B]">
+                {r.rate}
+              </Display>
             </div>
-            <p className="mt-0.5 pl-6 text-[10px] font-medium text-[#1565C0]/50">
-              미분양 {r.count.toLocaleString()}호
-            </p>
-            <div className="mt-1.5 h-2.5 w-full overflow-hidden rounded-full bg-[#E3F2FD]">
+            <div className="mt-2 h-px w-full bg-black/10">
               <div
-                className="h-full rounded-full"
-                style={{
-                  width: `${Math.min(parseFloat(r.rate), 100)}%`,
-                  background: GRAD.highlightGreen,
-                }}
+                className="h-px bg-[#C0392B]"
+                style={{ width: `${Math.min(parseFloat(r.rate), 100)}%` }}
               />
             </div>
           </li>
         ))}
       </ul>
       {data.conclusion && (
-        <div className="mx-4 mb-10">
-          <HighlightBox text={data.conclusion} variant="green" />
-        </div>
+        <Body className="mx-7 mb-12 text-[12px] leading-[1.55]">{data.conclusion}</Body>
       )}
       <BrandMark />
     </CardRoot>
