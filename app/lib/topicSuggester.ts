@@ -1,7 +1,5 @@
 import type { Category, ContentFormat } from "./cardTypes";
-import { FORMAT_LABELS } from "./cardTypes";
-import { getTopicsForCategory, type TopicBlueprint } from "./contentLibrary";
-
+import { getTopicsForCategory, resolveBlueprint, type TopicBlueprint } from "./contentLibrary";
 export interface SuggestedTopic {
   id: string;
   blueprintId: string;
@@ -31,8 +29,7 @@ export async function suggestDailyTopics(
 
 export function findBlueprint(
   blueprintId: string,
-  category: Category,
   date: string,
-): TopicBlueprint | undefined {
-  return getTopicsForCategory(category, date).find((t) => t.id === blueprintId);
+): ReturnType<typeof resolveBlueprint> {
+  return resolveBlueprint(blueprintId, date);
 }

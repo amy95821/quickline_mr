@@ -1,6 +1,6 @@
-import type { CardSlide, Category, GeneratedContent } from "./cardTypes";
-import { buildHashtags } from "./hashtags";
-import { findBlueprint, type SuggestedTopic } from "./topicSuggester";
+import type { CardSlide, GeneratedContent } from "./cardTypes";
+import { buildBrightCaption } from "./captionTone";
+import { buildHashtags } from "./hashtags";import { findBlueprint, type SuggestedTopic } from "./topicSuggester";
 import { analyzeUnsold, MOCK_UNSOLD_ROWS } from "./unsoldParser";
 
 function buildUnsoldSlides(region: string): CardSlide[] {
@@ -27,24 +27,23 @@ function buildUnsoldSlides(region: string): CardSlide[] {
 function buildUnsoldCaption(region: string, slides: CardSlide[]): string {
   const slide = slides[0];
   const lines = [
-    `${region} 미분양 TOP 3, 2040한테 중요한 구역만 정리했어요.`,
+    `${region} 미분양 TOP 3 — 2040 주목 구역만 쏙! 👀`,
     "",
     ...(slide?.topRegions?.map(
-      (r, i) => `${i + 1}. ${r.name} — 미분양 ${r.count}호 (${r.rate})`,
+      (r, i) => `${i + 1}. ${r.name} — ${r.rate} (${r.count.toLocaleString()}호)`,
     ) ?? []),
     "",
     slide?.conclusion ?? slide?.highlight ?? "",
     "",
-    "분양·입주 타이밍 잡을 때 참고하세요. 저장 추천!",
+    "저장해두면 나중에 진짜 도움됩니다 📌",
   ];
   return lines.join("\n");
 }
-
 export function generateFromTopic(
   topic: SuggestedTopic,
   date: string,
 ): GeneratedContent {
-  const bp = findBlueprint(topic.blueprintId, topic.category, date);
+  const bp = findBlueprint(topic.blueprintId, date);
   if (!bp) {
     throw new Error("주제를 찾을 수 없습니다.");
   }
@@ -54,20 +53,14 @@ export function generateFromTopic(
       ? buildUnsoldSlides(topic.unsoldRegion ?? bp.unsoldRegion ?? "경기")
       : bp.buildSlides(date);
 
-  slides = slides.map((s, i) => ({
-    ...s,
-    slideIndex: s.slideIndex ?? (slides.length > 1 ? i + 1 : undefined),
-    totalSlides: s.totalSlides ?? (slides.length > 1 ? slides.length : undefined),
-  }));
-
   const hashtags = buildHashtags(topic.category);
-  const bodyCaption =
+  const fallbackCaption =
     bp.unsoldRegion || topic.unsoldRegion
       ? buildUnsoldCaption(topic.unsoldRegion ?? bp.unsoldRegion ?? "경기", slides)
       : bp.buildCaption(slides);
 
+  const bodyCaption = buildBrightCaption(topic.blueprintId, fallbackCaption, slides);
   const caption = `${bodyCaption}\n\n${hashtags.join(" ")}`;
-
   return {
     topicId: topic.id,
     summary: bp.summary,

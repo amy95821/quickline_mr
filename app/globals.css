@@ -2,14 +2,37 @@
 
 @import "tailwindcss";
 
+@font-face {
+  font-family: "GmarketSans";
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.woff")
+    format("woff");
+}
+
+@font-face {
+  font-family: "GmarketSans";
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansMedium.woff")
+    format("woff");
+}
+
 :root {
   --font-pretendard: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --background: #f7f6f4;
-  --foreground: #1a1a1a;
+  --font-gmarket: "GmarketSans", "Pretendard", sans-serif;
+  --background: #eef6ff;
+  --foreground: #0d2137;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-pretendard);
+}
+
+.font-card {
+  font-family: var(--font-gmarket);
 }

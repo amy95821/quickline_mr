@@ -915,6 +915,29 @@ function pickCompareId(date: string): CompareTopicId {
   return ids[hashSeed(date) % ids.length];
 }
 
+export function resolveBlueprint(
+  blueprintId: string,
+  date: string,
+): TopicBlueprint | undefined {
+  const staticTopic = ALL_TOPICS.find((t) => t.id === blueprintId);
+  if (staticTopic) return staticTopic;
+
+  if (blueprintId.startsWith("compare-")) {
+    const compareId = blueprintId.slice("compare-".length) as CompareTopicId;
+    return buildDataCompareTopic(compareId, date);
+  }
+
+  if (blueprintId.startsWith("unsold-")) {
+    return buildUnsoldTopic(blueprintId.slice("unsold-".length));
+  }
+
+  if (blueprintId.startsWith("economy-calendar-")) {
+    return buildEconomyCalendar(date);
+  }
+
+  return undefined;
+}
+
 export function getTopicById(id: string): TopicBlueprint | undefined {
   return ALL_TOPICS.find((t) => t.id === id);
 }

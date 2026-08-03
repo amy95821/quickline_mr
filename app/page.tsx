@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { toPng } from "html-to-image";
 import { ChevronLeft, ChevronRight, Copy, Download, DownloadCloud, RefreshCw, Upload } from "lucide-react";
 import { InstaCardPreview } from "./components/InstaCardPreview";
+import { FeedbackPanel } from "./components/FeedbackPanel";
 import {
   BRAND_HANDLE,
   CATEGORIES,
@@ -12,7 +13,7 @@ import {
   type Category,
   type GeneratedContent,
 } from "./lib/cardTypes";
-import { generateUnsoldFromUpload } from "./lib/contentGenerator";
+import { generateFromTopic, generateUnsoldFromUpload } from "./lib/contentGenerator";
 import {
   MOCK_UNSOLD_ROWS,
   parseUnsoldExcel,
@@ -39,6 +40,7 @@ export default function Home() {
   const [unsoldRegion, setUnsoldRegion] = useState<string>("경기");
   const [unsoldRows, setUnsoldRows] = useState<UnsoldRow[]>(MOCK_UNSOLD_ROWS);
   const [excelName, setExcelName] = useState<string | null>(null);
+  const [editableCaption, setEditableCaption] = useState("");
 
   const [toast, setToast] = useState<string | null>(null);
   const notify = (m: string) => {
@@ -57,6 +59,7 @@ export default function Home() {
         setTopics(data.topics);
         setSelected(data.topics[0] ?? null);
         setContent(null);
+        setEditableCaption("");
         setSlideIndex(0);
       }
     } finally {
@@ -68,27 +71,29 @@ export default function Home() {
     void loadTopics();
   }, [loadTopics]);
 
-  const handleGenerate = async () => {
+  const handleGenerate = () => {
     if (!selected) return;
     setGenerating(true);
     try {
-      const res = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic: selected, date }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setContent(data as GeneratedContent);
-        setSlideIndex(0);
-      } else notify(data.error ?? "생성 실패");
+      const data = generateFromTopic(selected, date);
+      if (!data.slides.length) {
+        notify("카드 슬라이드가 비어 있습니다.");
+        return;
+      }
+      setContent(data);
+      setEditableCaption(data.caption);
+      setSlideIndex(0);
+    } catch (e) {
+      notify(e instanceof Error ? e.message : "생성 실패");
     } finally {
       setGenerating(false);
     }
   };
 
   const handleUnsold = () => {
-    setContent(generateUnsoldFromUpload(unsoldRegion, unsoldRows));
+    const data = generateUnsoldFromUpload(unsoldRegion, unsoldRows);
+    setContent(data);
+    setEditableCaption(data.caption);
     setSlideIndex(0);
     notify("미분양 카드 생성");
   };
@@ -131,14 +136,14 @@ export default function Home() {
   };
 
   const copyCaption = () => {
-    if (!content?.caption) return;
-    void navigator.clipboard.writeText(content.caption);
+    if (!editableCaption) return;
+    void navigator.clipboard.writeText(editableCaption);
     notify("본문+해시태그 복사");
   };
 
   return (
-    <div className="min-h-screen bg-[#f7f6f4]">
-      <header className="border-b border-black/[0.06] bg-[#f7f6f4] px-8 py-6">
+    <div className="min-h-screen bg-gradient-to-br from-[#E3F2FD] via-[#f7f6f4] to-[#E8F8F5]">
+      <header className="border-b border-[#2196F3]/10 bg-white/60 px-8 py-6 backdrop-blur-sm">
         <div className="mx-auto flex max-w-6xl items-end justify-between">
           <div>
             <p className="text-[11px] tracking-[0.25em] text-black/40 uppercase">
@@ -221,7 +226,7 @@ export default function Home() {
             <button
               type="button"
               disabled={!selected || generating}
-              onClick={() => void handleGenerate()}
+              onClick={handleGenerate}
               className="mt-6 w-full py-3 text-sm font-medium text-black/80 underline-offset-4 hover:underline disabled:opacity-30"
             >
               {generating ? "생성 중…" : "선택 주제로 카드 만들기"}
@@ -326,7 +331,7 @@ export default function Home() {
                 className="flex items-center gap-2 text-sm text-black/60 disabled:opacity-30"
               >
                 <Download className="h-4 w-4" />
-                {totalSlides > 1 ? `${slideIndex + 1}장 PNG` : "PNG"}
+                {totalSlides > 1 ? "PNG 저장" : "PNG 저장"}
               </button>
               {totalSlides > 1 && (
                 <button
@@ -341,7 +346,7 @@ export default function Home() {
               )}
               <button
                 type="button"
-                disabled={!content?.caption}
+                disabled={!editableCaption}
                 onClick={copyCaption}
                 className="flex items-center gap-2 text-sm text-black/60 disabled:opacity-30"
               >
@@ -350,14 +355,29 @@ export default function Home() {
               </button>
             </div>
 
-            {content?.caption && (
-              <textarea
-                readOnly
-                value={content.caption}
-                className="mx-auto mt-6 block w-full max-w-[420px] resize-none border-0 bg-transparent text-xs leading-relaxed text-black/55 outline-none"
-                rows={10}
-              />
+            {(editableCaption || content) && (
+              <div className="mx-auto mt-6 max-w-[420px]">
+                <p className="mb-2 text-[11px] font-bold text-[#1565C0]">인스타 본문 (직접 수정 가능)</p>
+                <textarea
+                  value={editableCaption}
+                  onChange={(e) => setEditableCaption(e.target.value)}
+                  className="block w-full resize-y rounded-xl border-0 bg-white/90 px-4 py-3 text-sm leading-relaxed text-[#0D2137] shadow-sm outline-none ring-1 ring-[#2196F3]/15 focus:ring-[#2196F3]/40"
+                  rows={10}
+                />
+              </div>
             )}
+
+            <FeedbackPanel
+              content={content}
+              slideIndex={slideIndex}
+              caption={editableCaption}
+              onCaptionChange={setEditableCaption}
+              onContentChange={(c) => {
+                setContent(c);
+                setEditableCaption(c.caption);
+              }}
+              onNotify={notify}
+            />
           </div>
         </div>
       </main>
