@@ -1,302 +1,156 @@
-import type { Category, Region } from "./tierData";
+import type { CardTemplateType, Category, CompareTopicId } from "./cardTypes";
 import type { SearchResult } from "./webSearch";
 import { webSearch } from "./webSearch";
-
-export type TopicMode = "ranking" | "editorial";
+import { isDataCompareDay, pickCompareTopicForDate } from "./marketData";
 
 export interface SuggestedTopic {
   id: string;
   category: Category;
+  template: CardTemplateType;
   title: string;
-  subtitleTemplate: string;
-  tag: string;
   reason: string;
-  defaultCount: 10 | 12 | 15;
   searchQueries: string[];
   hashtags: string[];
-  mode: TopicMode;
+  /** tier 전용 */
+  defaultCount?: 8 | 10;
+  /** data-compare 전용 (부동산, 주 1~2회) */
+  compareTopicId?: CompareTopicId;
+  memeKey?: "frog" | "cat" | "office";
+  swipeAccent?: "cream" | "green" | "charcoal";
 }
 
-interface CategoryMeta {
-  trendQueries: string[];
-  titleFrames: string[];
-  subtitleFrames: string[];
-  tags: string[];
-  hashtags: string[];
-  defaultMode: TopicMode;
-}
-
-const CATEGORY_META: Record<Category, CategoryMeta> = {
-  부동산: {
-    trendQueries: [
-      "부동산 인스타 카드뉴스 인기",
-      "아파트 티어 트렌드",
-      "30대 부동산 관심",
-      "전세 전월세 이슈",
-    ],
-    titleFrames: [
-      "{kw} {angle} 순위",
-      "요즘 {angle} 사이 {kw}",
-      "{angle}가 주목하는 {kw}",
-      "실전 {kw} {angle} 정리",
-      "{kw} {angle} 비교",
-    ],
-    subtitleFrames: [
-      "웹 트렌드 TOP {n}",
-      "오늘의 {angle} TOP {n}",
-      "30대 Pick TOP {n}",
-    ],
-    tags: ["부동산", "PICK", "TREND", "LIST", "CHECK"],
-    hashtags: ["#부동산", "#아파트", "#30대", "#quickline_mr"],
-    defaultMode: "ranking",
-  },
-  "아파트 브랜드 티어": {
-    trendQueries: [
-      "아파트 브랜드 순위 인기",
-      "K-브랜드지수 아파트",
-      "브랜드 프리미엄 비교",
-    ],
-    titleFrames: [
-      "{kw} 브랜드 {angle}",
-      "브랜드 {angle} {kw}",
-      "{angle} 브랜드 {kw} 순위",
-    ],
-    subtitleFrames: ["브랜드 TOP {n}", "평판 순위 TOP {n}"],
-    tags: ["BRAND", "TIER", "RANK", "TOP"],
-    hashtags: ["#아파트브랜드", "#브랜드티어", "#quickline_mr"],
-    defaultMode: "ranking",
-  },
-  "시공사 티어": {
-    trendQueries: [
-      "시공사 순위 평판",
-      "건설사 하자 이슈",
-      "아파트 시공사 비교",
-    ],
-    titleFrames: [
-      "시공사 {angle} {kw}",
-      "{kw} 시공사 {angle}",
-      "{angle} 시공사 {kw} 순위",
-    ],
-    subtitleFrames: ["시공력 TOP {n}", "평판 TOP {n}"],
-    tags: ["BUILD", "TIER", "RANK"],
-    hashtags: ["#시공사", "#시공사티어", "#quickline_mr"],
-    defaultMode: "ranking",
-  },
-  "상권 티어": {
-    trendQueries: [
-      "상권 순위 핫플",
-      "MZ 상권 트렌드",
-      "서울 상권 분석",
-    ],
-    titleFrames: [
-      "{kw} 상권 {angle}",
-      "{angle} 상권 {kw}",
-      "핫 상권 {kw} {angle}",
-    ],
-    subtitleFrames: ["상권 TOP {n}", "유동·성장 TOP {n}"],
-    tags: ["상권", "HOT", "ZONE"],
-    hashtags: ["#상권", "#상권티어", "#quickline_mr"],
-    defaultMode: "ranking",
-  },
-  "학군 티어": {
-    trendQueries: [
-      "학군 순위 2026",
-      "특목고 학군 인기",
-      "학군 아파트 프리미엄",
-    ],
-    titleFrames: [
-      "{region} {kw} {angle}",
-      "{region} 학군 {kw} {angle}",
-      "{angle} {kw} {region} 순위",
-    ],
-    subtitleFrames: ["{region} TOP {n}", "학군 TOP {n}"],
-    tags: ["학군", "EDU", "PICK"],
-    hashtags: ["#학군", "#학군티어", "#quickline_mr"],
-    defaultMode: "ranking",
-  },
-  "서울 집값 티어": {
-    trendQueries: [
-      "서울 집값 티어 인스타",
-      "서울 아파트 실거래 순위",
-      "서울 구별 시세",
-    ],
-    titleFrames: [
-      "서울 {kw} {angle}",
-      "{kw} 서울 {angle} 순위",
-      "서울 집값 {angle} {kw}",
-    ],
-    subtitleFrames: ["서울 TOP {n}", "구별 TOP {n}"],
-    tags: ["서울", "PRICE", "TIER"],
-    hashtags: ["#서울집값", "#실거래", "#quickline_mr"],
-    defaultMode: "ranking",
-  },
-  "경제·재테크 TOP": {
-    trendQueries: [
-      "30대 재테크 트렌드",
-      "MZ 재테크 인스타",
-      "직장인 재테크 키워드",
-    ],
-    titleFrames: [
-      "{kw} {angle} 정리",
-      "30대 {kw} {angle}",
-      "{angle} {kw} 순위",
-    ],
-    subtitleFrames: ["재테크 TOP {n}", "키워드 TOP {n}"],
-    tags: ["MONEY", "TIP", "LIST"],
-    hashtags: ["#재테크", "#30대", "#quickline_mr"],
-    defaultMode: "ranking",
-  },
-  "댓글 핫픽": {
-    trendQueries: [
-      "부동산 논란 반응",
-      "경제 커뮤니티 화제",
-      "재테크 논쟁 이슈",
-      "정책 반응 논란",
-    ],
-    titleFrames: [
-      "사람들이 말하는 {kw}",
-      "{kw} 숨은 논점",
-      "왜 {kw}에 분분할까",
-      "{kw} 찬반 정리",
-      "오늘의 {kw} 쟁점",
-    ],
-    subtitleFrames: ["쟁점 TOP {n}", "핵심 논점 {n}"],
-    tags: ["ISSUE", "TALK", "POINT"],
-    hashtags: ["#핫이슈", "#quickline_mr"],
-    defaultMode: "editorial",
-  },
+const CATEGORY_QUERIES: Record<Category, string[]> = {
+  부동산: ["부동산 인스타 카드뉴스", "전세 전월세 2040", "아파트 트렌드"],
+  경제: ["2040 재테크 트렌드", "금리 환율 MZ", "직장인 재테크"],
+  시사: ["시사 이슈 2040", "정책 청년 주거", "경제 시사"],
+  "아파트 브랜드": ["아파트 브랜드 순위", "브랜드 프리미엄"],
+  "미분양·공급": ["미분양 현황", "입주물량 아파트", "공급 부족 집값"],
 };
 
-const ANGLES = [
-  "30대",
-  "초보",
-  "신혼",
-  "실전",
-  "가성비",
-  "장기",
-  "단기",
-  "핵심",
-  "숨은",
-  "요즘",
+const MEME_PUNCH = [
+  "월급은 그대로인데 전세만 올랐을 때",
+  "부동산 공부 시작했다가 머리 터진 사람",
+  "청약 넣었는데 당첨 문자 온 줄 알았더니",
+  "전세 계약서 읽다가 잠든 적 있는 사람",
 ];
 
-const REGION_LABEL: Record<Region, string> = {
-  서울: "서울",
-  경기: "경기",
-  인천: "인천",
-};
+const SWIPE_Q = [
+  "2040 직장인이 전세를 절대로 살면 안 되는 이유",
+  "갭투자, 지금 들어가도 늦지 않았을까?",
+  "내 연봉으로 빌 수 있는 집의 상한선",
+  "무주택 기간, 하루 차이로 청약가점이 바뀐다면",
+];
 
-function hashSeed(str: string): number {
+function hashSeed(s: string): number {
   let h = 0;
-  for (let i = 0; i < str.length; i++) {
-    h = (h << 5) - h + str.charCodeAt(i);
-    h |= 0;
-  }
+  for (let i = 0; i < s.length; i++) h = (h << 5) - h + s.charCodeAt(i);
   return Math.abs(h);
 }
 
-function pick<T>(arr: T[], seed: number, offset: number): T {
-  return arr[(seed + offset) % arr.length];
+function assignTemplates(
+  seed: number,
+  category: Category,
+  date: string,
+): CardTemplateType[] {
+  const tierCount = seed % 5 === 0 ? 2 : 1;
+  const includeCompare =
+    category === "부동산" && isDataCompareDay(date);
+
+  const pool: CardTemplateType[] = includeCompare
+    ? ["meme", "swipe", "calendar", "data-compare"]
+    : ["meme", "swipe", "calendar"];
+
+  const offset = seed % pool.length;
+  const rotated = [...pool.slice(offset), ...pool.slice(0, offset)];
+
+  if (tierCount === 2) {
+    return [rotated[0], "tier", rotated[1], "tier", rotated[2]];
+  }
+  return [rotated[0], rotated[1], "tier", rotated[2], rotated[3] ?? rotated[0]];
 }
 
-function extractKeywords(results: SearchResult[], count: number): string[] {
-  const kws: string[] = [];
-  const seen = new Set<string>();
-
-  for (const r of results) {
-    const text = `${r.title} ${r.snippet}`;
-    const chunks = text
-      .split(/[\s,·\-|/[\]()]+/)
-      .map((s) => s.trim())
-      .filter((s) => s.length >= 2 && s.length <= 10);
-
-    for (const c of chunks) {
-      if (/^[가-힣]{2,10}$/.test(c) && !seen.has(c)) {
-        seen.add(c);
-        kws.push(c);
-      }
-      if (kws.length >= count + 10) break;
-    }
-  }
-
-  if (kws.length < count) {
-    kws.push("트렌드", "순위", "비교", "정리", "핵심", "이슈", "체크", "분석");
-  }
-
-  return kws.slice(0, count + 5);
-}
-
-function buildTitle(
-  frame: string,
-  kw: string,
-  angle: string,
-  region?: Region,
-): string {
-  return frame
-    .replace("{kw}", kw)
-    .replace("{angle}", angle)
-    .replace("{region}", region ? REGION_LABEL[region] : "서울");
+function extractKeyword(results: SearchResult[], i: number): string {
+  const r = results[i];
+  if (!r) return "부동산";
+  const t = r.title.split(/[-–|]/)[0].trim();
+  return t.slice(0, 12) || "트렌드";
 }
 
 export async function suggestDailyTopics(
   category: Category,
   date: string,
-  region?: Region,
-  count = 5,
 ): Promise<SuggestedTopic[]> {
-  const meta = CATEGORY_META[category];
-  const seed = hashSeed(`${date}-${category}-${region ?? ""}`);
+  const seed = hashSeed(`${date}-${category}`);
+  const templates = assignTemplates(seed, category, date);
+  const results = await webSearch(CATEGORY_QUERIES[category], 12);
+  const hashtags = ["#quickline_mr", "#2040", "#부동산"];
 
-  const trendResults = await webSearch(meta.trendQueries, 15);
-  const keywords = extractKeywords(trendResults, count + 3);
+  const accents = ["cream", "green", "charcoal"] as const;
+  const memes = ["frog", "cat", "office"] as const;
+  const compareTopic = pickCompareTopicForDate(date);
 
-  const topics: SuggestedTopic[] = [];
-  const usedTitles = new Set<string>();
+  return templates.map((template, i) => {
+    const kw = extractKeyword(results, i);
+    const id = `${date}-${category}-${template}-${i}`;
 
-  for (let i = 0; i < count; i++) {
-    const kw = keywords[i % keywords.length];
-    const angle = pick(ANGLES, seed, i * 3);
-    const titleFrame = pick(meta.titleFrames, seed, i);
-    const subtitleFrame = pick(meta.subtitleFrames, seed, i + 7);
-    const tag = pick(meta.tags, seed, i + 2);
-
-    let title = buildTitle(titleFrame, kw, angle, region);
-    if (usedTitles.has(title)) {
-      title = buildTitle(pick(meta.titleFrames, seed, i + 11), kw, pick(ANGLES, seed, i + 5), region);
+    switch (template) {
+      case "meme":
+        return {
+          id,
+          category,
+          template,
+          title: MEME_PUNCH[(seed + i) % MEME_PUNCH.length],
+          reason: results[i]?.snippet?.slice(0, 50) ?? "공감형 Type A",
+          searchQueries: CATEGORY_QUERIES[category],
+          hashtags,
+          memeKey: memes[(seed + i) % 3],
+        };
+      case "swipe":
+        return {
+          id,
+          category,
+          template,
+          title: SWIPE_Q[(seed + i) % SWIPE_Q.length],
+          reason: "첫 장에서 멈추게 하는 질문형",
+          searchQueries: [SWIPE_Q[(seed + i) % SWIPE_Q.length]],
+          hashtags,
+          swipeAccent: accents[(seed + i) % 3],
+        };
+      case "calendar": {
+        const d = new Date(date);
+        return {
+          id,
+          category,
+          template,
+          title: `${d.getMonth() + 1}월 ${category} 일정`,
+          reason: "저장·공유형 실용 콘텐츠",
+          searchQueries: [`${d.getMonth() + 1}월 부동산 일정`, "청약 세금 마감"],
+          hashtags,
+        };
+      }
+      case "data-compare":
+        return {
+          id,
+          category,
+          template,
+          title: compareTopic.title,
+          reason: "KB지수·입주물량 대조 (주 1~2회)",
+          searchQueries: [compareTopic.regionTag, "매매지수", "입주물량"],
+          hashtags,
+          compareTopicId: compareTopic.id,
+        };
+      case "tier":
+      default:
+        return {
+          id,
+          category,
+          template: "tier",
+          title: `${kw} 순위`,
+          reason: results[i]?.snippet?.slice(0, 50) ?? "순위형 (주 1~2회)",
+          searchQueries: CATEGORY_QUERIES[category],
+          hashtags,
+          defaultCount: 8,
+        };
     }
-    usedTitles.add(title);
-
-    const defaultCount = pick([10, 12, 15] as const, seed, i);
-    const searchQueries = [
-      `${title} 2026`,
-      `${kw} ${category.replace(/ 티어| TOP/g, "")} 트렌드`,
-      ...meta.trendQueries.slice(0, 1),
-    ];
-
-    const snippet = trendResults[i]?.snippet ?? trendResults[0]?.snippet ?? "";
-    const reason = snippet
-      ? snippet.slice(0, 60) + (snippet.length > 60 ? "…" : "")
-      : "오늘 웹 트렌드 기반 제안";
-
-    topics.push({
-      id: `${date}-${category}-${i}-${hashSeed(title) % 10000}`,
-      category,
-      title,
-      subtitleTemplate: subtitleFrame,
-      tag,
-      reason,
-      defaultCount,
-      searchQueries,
-      hashtags: meta.hashtags,
-      mode: meta.defaultMode,
-    });
-  }
-
-  return topics;
-}
-
-export function topicToSubtitle(topic: SuggestedTopic, n: number, region?: Region): string {
-  return topic.subtitleTemplate
-    .replace("{n}", String(n))
-    .replace("{region}", region ? REGION_LABEL[region] : "서울");
+  });
 }

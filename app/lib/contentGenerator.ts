@@ -1,184 +1,163 @@
+import type {
+  CardPayload,
+  GeneratedContent,
+  RankedItem,
+} from "./cardTypes";
+import { getComparePayload } from "./marketData";
 import type { SuggestedTopic } from "./topicSuggester";
-import type { CategoryContent, RankedItem, TierGrade } from "./tierData";
 import type { SearchResult } from "./webSearch";
-import { topicToSubtitle } from "./topicSuggester";
-import type { Region } from "./tierData";
 
-function rankToTier(rank: number): TierGrade {
-  if (rank <= 3) return "S";
-  if (rank <= 7) return "A";
-  if (rank <= 11) return "B";
-  if (rank <= 14) return "C";
-  return "D";
+function shorten(s: string, n: number) {
+  return s.length <= n ? s : s.slice(0, n - 1) + "…";
 }
 
-function shorten(text: string, max: number): string {
-  const c = text.replace(/\s+/g, " ").trim();
-  return c.length <= max ? c : c.slice(0, max - 1) + "…";
-}
-
-const ENTITY_PATTERNS = [
-  /([가-힣]{2,12}(?:아파트|APT|단지|브랜드|역|동|구|시))/g,
-  /([가-힣]{2,10}(?:챌린지|적금|ETF|DSR|LTV|청약))/gi,
-];
-
-const BRANDS = [
-  "힐스테이트", "래미안", "자이", "푸르지오", "e편한세상",
-  "아이파크", "롯데캐슬", "더샵", "디에이치",
-];
-
-function extractEntities(text: string): string[] {
-  const found: string[] = [];
-  for (const b of BRANDS) if (text.includes(b)) found.push(b);
-  for (const p of ENTITY_PATTERNS) {
-    for (const m of text.matchAll(p)) {
-      const e = m[1]?.trim();
-      if (e && e.length >= 2) found.push(e);
-    }
-  }
-  return found;
-}
-
-function uniqueEntities(results: SearchResult[], count: number): string[] {
-  const out: string[] = [];
+function buildTierItems(results: SearchResult[], count: number): RankedItem[] {
+  const items: RankedItem[] = [];
   const seen = new Set<string>();
   for (const r of results) {
-    for (const e of extractEntities(`${r.title} ${r.snippet}`)) {
-      const k = e.replace(/\s/g, "");
-      if (!seen.has(k)) {
-        seen.add(k);
-        out.push(e);
-      }
-    }
+    const label = shorten(r.title.split(/[-–|]/)[0], 18);
+    if (seen.has(label)) continue;
+    seen.add(label);
+    items.push({
+      rank: items.length + 1,
+      label,
+      hook: shorten(r.snippet || r.source, 10),
+      tier: items.length < 3 ? "S" : items.length < 6 ? "A" : "B",
+    });
+    if (items.length >= count) break;
   }
-  if (out.length < count) {
-    for (const r of results) {
-      const fb = shorten(r.title.split(/[-–|:]/)[0], 18);
-      const k = fb.replace(/\s/g, "");
-      if (!seen.has(k) && fb.length >= 3) {
-        seen.add(k);
-        out.push(fb);
-      }
-      if (out.length >= count) break;
-    }
-  }
-  return out.slice(0, count);
+  return items;
 }
 
-function hookForEntity(entity: string, results: SearchResult[]): string {
-  for (const r of results) {
-    if (`${r.title} ${r.snippet}`.includes(entity) && r.snippet) {
-      return shorten(r.snippet, 12);
-    }
-  }
-  return "관심↑";
-}
-
-function buildRankingItems(
+function calendarEventsFromSearch(
   results: SearchResult[],
-  count: number,
-): RankedItem[] {
-  const entities = uniqueEntities(results, count);
-  return entities.map((label, i) => ({
-    rank: i + 1,
-    label: shorten(label, 20),
-    tier: rankToTier(i + 1),
-    hook: hookForEntity(label, results),
+  month: number,
+): { day: number; label: string }[] {
+  const defaults = [
+    { day: 5, label: "청약 접수" },
+    { day: 12, label: "전월세 신고" },
+    { day: 18, label: "금리 발표" },
+    { day: 25, label: "종소세 안내" },
+  ];
+  if (results.length === 0) return defaults;
+  return defaults.map((d, i) => ({
+    day: d.day,
+    label: shorten(results[i]?.title.split(/[-–|]/)[0] ?? d.label, 8),
   }));
 }
 
-function cleanHeadline(raw: string): string {
-  return raw
-    .split(" - ")[0]
-    .split("|")[0]
-    .replace(/\[.*?\]/g, "")
-    .replace(/\(.*?\)/g, "")
-    .trim();
-}
-
-const EDITORIAL_FRAMES = [
-  (core: string) => ({ label: `${core}, 아직 모르는 쪽`, hook: "논점" }),
-  (core: string) => ({ label: `${core}의 반대편`, hook: "찬반" }),
-  (core: string) => ({ label: `왜 ${core}인가`, hook: "배경" }),
-  (core: string) => ({ label: `${core} 다음 수`, hook: "전망" }),
-  (core: string) => ({ label: `${core} vs 현실`, hook: "비교" }),
-  (core: string) => ({ label: `${core} 숨은 조건`, hook: "체크" }),
-];
-
-function toEditorialItem(result: SearchResult, index: number): RankedItem {
-  const core = shorten(cleanHeadline(result.title), 16);
-  const frame = EDITORIAL_FRAMES[index % EDITORIAL_FRAMES.length];
-  const { label, hook } = frame(core);
-
-  return {
-    rank: index + 1,
-    label,
-    tier: rankToTier(index + 1),
-    hook: result.snippet ? shorten(result.snippet, 10) : hook,
-  };
-}
-
-function buildEditorialItems(
-  results: SearchResult[],
-  count: number,
-): RankedItem[] {
-  return results.slice(0, count).map((r, i) => toEditorialItem(r, i));
-}
-
-function buildCaption(
-  topic: SuggestedTopic,
-  subtitle: string,
-  items: RankedItem[],
-  sources: SearchResult[],
-): string {
-  const header = `${topic.title}\n${subtitle}`;
-
-  const lines =
-    topic.mode === "editorial"
-      ? items
-          .map((it) => `${it.rank}. ${it.label}\n   ${it.hook}`)
-          .join("\n")
-      : items.map((it) => `${it.rank}. ${it.label} — ${it.hook}`).join("\n");
-
-  const refs = sources.slice(0, 4).map((s) => `- ${s.source}`).join("\n");
-
-  return `${header}
-
-${lines}
-
-참고: ${refs}
-
-저장 후 공유해 주세요.`;
-}
-
-export function generateContentFromTopic(
+export function generateFromTopic(
   topic: SuggestedTopic,
   results: SearchResult[],
-  displayCount: number,
-  region?: Region,
-): CategoryContent {
-  const subtitle = topicToSubtitle(topic, displayCount, region);
-  const rankedItems =
-    topic.mode === "editorial"
-      ? buildEditorialItems(results, displayCount)
-      : buildRankingItems(results, displayCount);
+  date: string,
+): GeneratedContent {
+  const d = new Date(date);
+  let payload: CardPayload;
+  let caption: string;
+
+  switch (topic.template) {
+    case "meme":
+      payload = {
+        template: "meme",
+        data: {
+          categoryTag: topic.category,
+          punchline: topic.title,
+          memeKey: topic.memeKey ?? "frog",
+        },
+      };
+      caption = `${topic.title}\n\n${topic.hashtags.join(" ")}`;
+      break;
+
+    case "swipe":
+      payload = {
+        template: "swipe",
+        data: {
+          question: topic.title,
+          accent: topic.swipeAccent ?? "green",
+        },
+      };
+      caption = `${topic.title}\n\n스와이프해서 확인\n${topic.hashtags.join(" ")}`;
+      break;
+
+    case "calendar":
+      payload = {
+        template: "calendar",
+        data: {
+          month: d.getMonth() + 1,
+          year: d.getFullYear(),
+          title: topic.title,
+          events: calendarEventsFromSearch(results, d.getMonth() + 1),
+        },
+      };
+      caption = `${topic.title}\n저장해 두세요.\n${topic.hashtags.join(" ")}`;
+      break;
+
+    case "data-compare": {
+      const compare = getComparePayload(
+        topic.compareTopicId ?? "seoul-supply-cliff",
+      );
+      payload = { template: "data-compare", data: compare };
+      caption = `${topic.title}\n${compare.insight}\n${topic.hashtags.join(" ")}`;
+      break;
+    }
+
+    case "tier":
+    default: {
+      const items = buildTierItems(results, topic.defaultCount ?? 8);
+      payload = {
+        template: "tier",
+        data: {
+          tag: topic.category,
+          title: topic.title,
+          subtitle: `TOP ${items.length}`,
+          items,
+        },
+      };
+      caption = items
+        .map((it) => `${it.rank}. ${it.label}`)
+        .join("\n")
+        .concat(`\n\n${topic.hashtags.join(" ")}`);
+      break;
+    }
+  }
 
   return {
     topicId: topic.id,
     topicTitle: topic.title,
-    headlines: results.slice(0, 5).map((r) => r.title),
-    cardTag: topic.tag,
-    cardTitle: topic.title,
-    cardSubtitle: subtitle,
-    rankedItems,
-    caption: buildCaption(topic, subtitle, rankedItems, results),
+    template: topic.template,
+    payload,
+    caption,
     hashtags: topic.hashtags,
-    clipSources: results.slice(0, 4).map((r) => ({
-      name: r.source,
-      query: shorten(r.title, 30),
-    })),
-    clipStrategy: `웹 검색 → ${topic.mode === "editorial" ? "논점 재구성" : "항목 추출"} TOP ${displayCount}`,
-    defaultCount: displayCount,
-    mode: topic.mode,
+    headlines: results.slice(0, 4).map((r) => r.title),
+  };
+}
+
+export function generateUnsoldContent(
+  region: string,
+  top: { district: string; unsoldUnits: number; unsoldRate: number }[],
+  insight: string,
+): GeneratedContent {
+  const payload: CardPayload = {
+    template: "unsold",
+    data: {
+      region,
+      title: "미분양 주의 구역",
+      topRegions: top.map((t) => ({
+        name: t.district,
+        count: t.unsoldUnits,
+        rate: `${t.unsoldRate.toFixed(1)}%`,
+      })),
+      insight,
+    },
+  };
+
+  return {
+    topicId: `unsold-${region}`,
+    topicTitle: "미분양 현황",
+    template: "unsold",
+    payload,
+    caption: `${region} 미분양 TOP3\n${insight}\n#미분양 #부동산 #quickline_mr`,
+    hashtags: ["#미분양", "#부동산", "#quickline_mr"],
+    headlines: top.map((t) => `${t.district} ${t.unsoldRate.toFixed(1)}%`),
   };
 }
