@@ -1,7 +1,7 @@
 import type { CardSlide, GeneratedContent } from "./cardTypes";
 import { buildBrightCaption } from "./captionTone";
 import { buildHashtags } from "./hashtags";
-import { enhanceSlides, enhanceSingleSlide } from "./slideEnhancer";
+import { enhanceSlides, enhanceSingleSlide, stripSourcesFromSlides, appendSourcesToCaption } from "./slideEnhancer";
 import { findBlueprint, type SuggestedTopic } from "./topicSuggester";
 import { analyzeUnsold, MOCK_UNSOLD_ROWS } from "./unsoldParser";
 
@@ -63,13 +63,17 @@ export function generateFromTopic(
     isTop10: topic.isTop10 ?? topic.blueprintId.startsWith("top10-"),
   });
 
+  const { slides: cleaned, sources } = stripSourcesFromSlides(slides);
+  slides = cleaned;
+
   const hashtags = buildHashtags(topic.category);
   const fallbackCaption =
     bp.unsoldRegion || topic.unsoldRegion
       ? buildUnsoldCaption(topic.unsoldRegion ?? bp.unsoldRegion ?? "경기", slides)
       : bp.buildCaption(slides);
 
-  const bodyCaption = buildBrightCaption(topic.blueprintId, fallbackCaption, slides);
+  let bodyCaption = buildBrightCaption(topic.blueprintId, fallbackCaption, slides);
+  bodyCaption = appendSourcesToCaption(bodyCaption, sources);
   const caption = `${bodyCaption}\n\n${hashtags.join(" ")}`;
 
   return {
@@ -103,15 +107,18 @@ export function generateUnsoldFromUpload(
   };
 
   const slides = enhanceSingleSlide(raw);
+  const { slides: cleaned, sources } = stripSourcesFromSlides(slides);
 
   const hashtags = buildHashtags("미분양·공급");
-  const caption = `${buildUnsoldCaption(region, slides)}\n\n${hashtags.join(" ")}`;
+  let caption = buildUnsoldCaption(region, cleaned);
+  caption = appendSourcesToCaption(caption, sources.length ? sources : ["국토교통부 미분양 현황"]);
+  caption = `${caption}\n\n${hashtags.join(" ")}`;
 
   return {
     topicId: `unsold-upload-${region}`,
     summary: `${region} 미분양 TOP 3 — 업로드 데이터`,
     format: "single",
-    slides,
+    slides: cleaned,
     caption,
     hashtags,
   };

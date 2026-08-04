@@ -125,7 +125,7 @@ export function getDailyTopicPicks(category: Category, date: string): TopicPickM
     used.add(bp.id);
     daily.push({
       blueprint: bp,
-      coverStyle: bp.coverStyle ?? slot.coverStyle,
+      coverStyle: slot.coverStyle,
       isTop10: false,
       slotLabel: slot.label,
       timelinessTag: bp.id.startsWith("timely-") ? slot.label : undefined,

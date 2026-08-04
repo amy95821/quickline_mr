@@ -135,11 +135,9 @@ const MY_HOME_REALITY: TopicBlueprint = {
       headline: "내 집 마련?\n일단 원룸부터",
       coverImage: PHOTOS.movingBoxes,
       body: [
-        "2040 1인 가구 40% — 첫 목표는 '아파트 소유'가 아님",
+        "2040 1인 가구 40% — 첫 목표는 '소유'가 아님",
         "전세·월세로 거주비 고정 → 저축 → 그다음 매수",
         "무리한 첫 매수 = DSR 3단계 + 금리에 발목",
-        "원룸·오피스텔 장기 거주 = 이사·보증금 스트레스↓",
-        "세법·청약 바뀌는 8월 — 현금흐름부터 튼튼히",
       ],
       highlight: "내 집 = '소유'보다 '거주 안정'이 먼저",
     },
@@ -165,6 +163,8 @@ export function buildDataCompareTopic(id: CompareTopicId, date: string): TopicBl
     summary: `${data.headline} — ${data.conclusion ?? data.insight} (KB지수·입주물량 대조, 한 장 요약)`,
     searchQueries: [data.regionTag, "KB 매매지수", "입주물량"],
     compareTopicId: id,
+    coverStyle: "chart-card",
+    photoKey: "seoulSkyline",
     buildSlides: () => [
       {
         layout: "chart",
@@ -187,6 +187,8 @@ export function buildDataCompareTopic(id: CompareTopicId, date: string): TopicBl
         "",
         "입주물량 바닥 칠 때 매매지수가 반등하는 패턴, 데이터로 확인해보세요.",
         "저장해 두었다가 매수·전세 타이밍 잡을 때 참고하세요.",
+        "",
+        "출처: KB부동산 · 통계청 입주물량",
       ].join("\n"),
   };
 }
@@ -445,22 +447,15 @@ const HOUSING_POLICY: TopicBlueprint = {
   searchQueries: ["국회 부동산 간담회", "주택 공급 정책", "부동산 세제"],
   buildSlides: () => [
     {
-      layout: "policy",
+      layout: "photo-hook",
       headline: "국회 부동산\n7,500건 민원",
-      subheadline: "우리한테 걸리는 건 이 3가지",
-      source: "국토부 · 기재부 · 금융위",
-      people: [
-        { name: "국토부", role: "주택공급", stat: "2,381", statLabel: "건 (32%)" },
-        { name: "금융위", role: "주택금융", stat: "1,892", statLabel: "건 (25%)" },
-        { name: "기재부", role: "부동산세", stat: "1,654", statLabel: "건 (22%)" },
-      ],
+      coverImage: PHOTOS.officeTower,
       body: [
-        "공급: 3기 신도시·신혼희망타운 일정",
-        "금융: DSR·스트레스 DSR 강화",
-        "세금: 종부세·취득세 개편 논의",
+        "국토부 32% — 3기 신도시·신혼희망타운",
+        "금융위 25% — DSR·스트레스 DSR 강화",
+        "기재부 22% — 종부세·취득세 개편",
       ],
-      highlight: "2040 = 전세·청약·DSR이 핵심 (세금은 간접)",
-      accent: "light",
+      highlight: "세금은 간접 — 대출 규제는 즉시 체감",
     },
   ],
   buildCaption: () =>
@@ -471,6 +466,8 @@ const HOUSING_POLICY: TopicBlueprint = {
       "2040한테 직접 걸리는 건 DSR·청약·전세 정책이에요.",
       "",
       "세금 개편은 간접 영향, 대출 규제는 즉시 체감.",
+      "",
+      "출처: 국토부 · 기재부 · 금융위",
     ].join("\n"),
 };
 
@@ -554,6 +551,9 @@ const APT_RANKING: TopicBlueprint = {
   id: "apt-brand-ranking",
   category: "아파트 브랜드",
   format: "single",
+  theme: "market",
+  coverStyle: "data-rank",
+  photoKey: "construction",
   summary:
     "경기 국민평형 실거래 TOP 7 — 단지명·평형·거래가를 apt_lap 스타일 리스트로 한 장 정리.",
   searchQueries: ["경기 아파트 실거래", "국민평형", "브랜드 아파트"],
@@ -562,7 +562,6 @@ const APT_RANKING: TopicBlueprint = {
       layout: "ranking",
       headline: "경기 32평\n실거래 TOP 7",
       subheadline: "같은 평수, 3배 차이 난다",
-      source: "국토부 실거래가 · '26.8.1 조회",
       rows: [
         { rank: 1, label: "판교", sub: "백현마을 2단지 32평", value: "28.0억", highlight: true },
         { rank: 2, label: "과천", sub: "과천자이 32평", value: "27.8억" },
@@ -584,6 +583,8 @@ const APT_RANKING: TopicBlueprint = {
       "브랜드·학군·교통이 가격을 갈라요.",
       "",
       "내 예산·출퇴근 기준으로 현실적인 동네부터 보세요.",
+      "",
+      "출처: 국토부 실거래가",
     ].join("\n"),
 };
 
@@ -691,28 +692,29 @@ const ASSEMBLY_LAND: TopicBlueprint = {
   id: "assembly-land-debate",
   category: "시사",
   format: "carousel",
+  theme: "policy",
+  coverStyle: "story",
+  photoKey: "officeTower",
   summary:
     "국회 국토위·정책위 부동산 법안 4장 스토리 — 전세사기 특별법·DSR·공급대책, 2040 영향 정리.",
   searchQueries: ["국회 부동산 법안", "전세사기 특별법", "국토위"],
   buildSlides: () => [
     {
-      layout: "hook",
+      layout: "photo-hook",
       headline: "국회 부동산법\n통과?",
-      subheadline: "우리한테 뭐가 바뀌나",
+      coverImage: PHOTOS.officeTower,
       accent: "dark",
       slideIndex: 1,
       totalSlides: 4,
     },
     {
-      layout: "policy",
-      headline: "국토교통위",
-      subheadline: "전세·월세·공급",
-      people: [
-        { name: "국토위", role: "전세사기", stat: "통과", statLabel: "특별법" },
-        { name: "국토부", role: "공급", stat: "3기", statLabel: "신도시" },
-        { name: "금융위", role: "DSR", stat: "3단", statLabel: "강화" },
+      layout: "story",
+      headline: "국토교통위 핵심",
+      body: [
+        "전세사기 특별법 — 피해 구제 확대·절차 단축",
+        "3기 신도시 청약 일정 — 무주택 기회↑",
+        "DSR 3단계 — 추가 대출 어려움",
       ],
-      body: ["전세사기 피해 구제 확대", "3기 신도시 청약 일정", "DSR 스트레스 테스트"],
       slideIndex: 2,
       totalSlides: 4,
     },
@@ -758,21 +760,15 @@ const TAX_REFORM: TopicBlueprint = {
   searchQueries: ["세제개편", "종부세", "취득세"],
   buildSlides: () => [
     {
-      layout: "policy",
-      headline: "세제개편\n7월 나온다",
-      subheadline: "급하게 움직이지 말 것",
-      people: [
-        { name: "기재부", role: "종부세", stat: "강화", statLabel: "다주택" },
-        { name: "기재부", role: "취득세", stat: "LTV", statLabel: "연계" },
-        { name: "국토부", role: "양도세", stat: "1가구", statLabel: "완화?" },
-      ],
+      layout: "photo-hook",
+      headline: "세제개편\n8월 윤곽",
+      coverImage: PHOTOS.contract,
       body: [
-        "다주택자 종부세·양도세 부담↑",
-        "무주택·1주택 실수요 — 변화 적을 수 있음",
-        "2040은 '보유'보다 '거주' 전략 유리",
+        "종부세 — 다주택·비거주 강화 (윤곽)",
+        "취득세 — LTV·대출 규제 연계",
+        "양도세 — 1주택·장특공 요건 케이스별",
       ],
-      highlight: "발표 전 매수·매도 서두르지 말 것 — 시행 시점 확인",
-      accent: "light",
+      highlight: "발표 전 급매수·급매도 X — 시행일 확인",
     },
   ],
   buildCaption: () =>
@@ -781,6 +777,8 @@ const TAX_REFORM: TopicBlueprint = {
       "",
       "다주택자 부담↑, 무주택·실수요는 상대적 유리.",
       "발표 전 급매수·급매도는 시행 시점 보고 결정하세요.",
+      "",
+      "출처: 기재부 · 국토부 세제개편안",
     ].join("\n"),
 };
 
@@ -790,6 +788,7 @@ const SEOUL_APT_RANKING: TopicBlueprint = {
   format: "single",
   theme: "market",
   coverStyle: "data-rank",
+  photoKey: "seoulSkyline",
   summary:
     "서울 국민평형(32평) 실거래 TOP 7 — 강남·마포·송파 등 동네별 거래가 한 장 리스트.",
   searchQueries: ["서울 아파트 실거래", "32평"],
@@ -797,8 +796,6 @@ const SEOUL_APT_RANKING: TopicBlueprint = {
     {
       layout: "ranking",
       headline: "서울 32평\n실거래 TOP 7",
-      subheadline: "강남 35억 vs 성동 16억",
-      source: "국토부 실거래가",
       rows: [
         { rank: 1, label: "강남", sub: "대치동 아파트 32평", value: "35.2억", highlight: true },
         { rank: 2, label: "송파", sub: "잠실 32평", value: "28.5억" },
@@ -815,6 +812,8 @@ const SEOUL_APT_RANKING: TopicBlueprint = {
     [
       "서울 32평 실거래 TOP 7 정리했어요.",
       "강남 35억 vs 성동 16억 — 입지·학군이 가격을 갈라요.",
+      "",
+      "출처: 국토부 실거래가",
     ].join("\n"),
 };
 
@@ -831,7 +830,6 @@ const BRAND_CHECKLIST: TopicBlueprint = {
     {
       layout: "ranking",
       headline: "브랜드만\n믿지 마",
-      source: "아파트 고를 때 5가지",
       rows: [
         { rank: 1, label: "실거래·전세가율", sub: "네이버·국토부", value: "필수" },
         { rank: 2, label: "입주물량·미분양", sub: "공급 압력", value: "확인" },

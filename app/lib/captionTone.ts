@@ -143,29 +143,18 @@ function brightenGeneric(text: string): string {
   return lines.join("\n");
 }
 
-export function applyFeedbackToCaption(
-  caption: string,
-  feedback: string,
-  author: string,
-): string {
+export function applyFeedbackToCaption(caption: string, feedback: string): string {
   const hashIdx = caption.indexOf("\n\n#");
   const body = hashIdx >= 0 ? caption.slice(0, hashIdx) : caption;
   const tags = hashIdx >= 0 ? caption.slice(hashIdx + 2) : "";
-  const who = author || "팀";
-  const note = [body.trimEnd(), "", "[" + who + " 피드백 반영]", feedback.trim()].join("\n");
+  const note = [body.trimEnd(), "", "[피드백 반영]", feedback.trim()].join("\n");
   return tags ? note + "\n\n" + tags : note;
 }
 
-export function applyFeedbackToSlide(
-  slide: CardSlide,
-  feedback: string,
-  author: string,
-): CardSlide {
-  const who = author || "팀";
-  const note = who + ": " + feedback.trim();
+export function applyFeedbackToSlide(slide: CardSlide, feedback: string): CardSlide {
   return {
     ...slide,
     highlight: feedback.trim().slice(0, 120),
-    body: [...(slide.body ?? []), note],
+    body: [...(slide.body ?? []), feedback.trim()],
   };
 }

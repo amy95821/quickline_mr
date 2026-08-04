@@ -43,7 +43,7 @@ const TOP10_POOL: Record<Category, Top10Entry[]> = {
       searchQueries: ["성수동 아파트", "10억 아파트", "뚝섬 실거래"],
       timely: "Source · 국토부 실거래 · 2026.7",
       highlightRank: 1,
-      photoKey: "apartmentNight",
+      photoKey: "seoulSkyline",
       items: [
         { rank: 1, label: "성수동1가", note: "리모델링·카페거리", value: "12.4억" },
         { rank: 2, label: "뚝섬", note: "한강뷰 10억대", value: "11.8억" },
@@ -64,7 +64,7 @@ const TOP10_POOL: Record<Category, Top10Entry[]> = {
       searchQueries: ["신혼 아파트 층수", "선호 층", "청약 층"],
       timely: "Source · 청약·실거래 설문",
       highlightRank: 1,
-      photoKey: "apartmentNight",
+      photoKey: "movingBoxes",
       items: [
         { rank: 1, label: "15~20층", note: "뷰+소음 밸런스", value: "32%" },
         { rank: 2, label: "10~14층", note: "가장 무난", value: "24%" },
@@ -87,7 +87,7 @@ const TOP10_POOL: Record<Category, Top10Entry[]> = {
       searchQueries: ["한국은행 금리", "FOMC 2026", "변동금리"],
       timely: "Source · 8.21 한은 금통위",
       highlightRank: 1,
-      photoKey: "apartmentNight",
+      photoKey: "cafeStreet",
       items: [
         { rank: 1, label: "변동금리 대출자", note: "이자↓", value: "★★★" },
         { rank: 2, label: "전세대출 보유", note: "DSR 여유", value: "★★★" },
@@ -110,7 +110,7 @@ const TOP10_POOL: Record<Category, Top10Entry[]> = {
       searchQueries: ["안심신탁", "전세신탁", "HUG 2026"],
       timely: "Source · HUG 8월 윤곽",
       highlightRank: 1,
-      photoKey: "apartmentNight",
+      photoKey: "contract",
       items: [
         { rank: 1, label: "연 4~5% 수익?", note: "조건 확인", value: "?" },
         { rank: 2, label: "전세금 안전?", note: "공적 관리", value: "O" },
@@ -133,7 +133,7 @@ const TOP10_POOL: Record<Category, Top10Entry[]> = {
       searchQueries: ["아파트 브랜드", "건설사 순위", "신혼 아파트"],
       timely: "Source · 상담·검색량",
       highlightRank: 1,
-      photoKey: "apartmentNight",
+      photoKey: "construction",
       items: [
         { rank: 1, label: "삼성물산", note: "브랜드·프리미엄", value: "래미안", logoKey: "samsung" },
         { rank: 2, label: "현대건설", note: "역세권 강세", value: "힐스테이트", logoKey: "hyundai" },
@@ -154,7 +154,7 @@ const TOP10_POOL: Record<Category, Top10Entry[]> = {
       searchQueries: ["성수 아파트", "브랜드 아파트", "실거래"],
       timely: "Source · 실거래·전세가율",
       highlightRank: 1,
-      photoKey: "apartmentNight",
+      photoKey: "subway",
       items: [
         { rank: 1, label: "래미안 옥수", note: "28억대", value: "28.4억" },
         { rank: 2, label: "자이 성수", note: "신축 프리미엄", value: "18.2억" },
@@ -177,7 +177,7 @@ const TOP10_POOL: Record<Category, Top10Entry[]> = {
       searchQueries: ["악성 미분양", "미분양 2026", "지방 미분양"],
       timely: "Source · 국토부 7.31",
       highlightRank: 1,
-      photoKey: "apartmentNight",
+      photoKey: "construction",
       items: [
         { rank: 1, label: "경북", note: "준공 미분양↑", value: "3,842호" },
         { rank: 2, label: "전남", note: "공급 과잉", value: "2,910호" },
@@ -224,7 +224,6 @@ function buildTop10FromEntry(entry: Top10Entry, category: Category): TopicBluepr
       {
         layout: "top10",
         headline: entry.headline,
-        source: entry.timely,
         top10Items: entry.items.map((item) => ({
           rank: item.rank,
           label: item.label,
@@ -245,6 +244,8 @@ function buildTop10FromEntry(entry: Top10Entry, category: Category): TopicBluepr
         entry.summary,
         "",
         ...entry.items.slice(0, 3).map((i) => `${i.rank}. ${i.label} — ${i.value}`),
+        "",
+        entry.timely ? `출처: ${entry.timely.replace(/^Source · /, "")}` : "",
         "",
         "저장해두고 비교해보세요 👉",
       ].join("\n"),

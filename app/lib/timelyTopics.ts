@@ -47,13 +47,11 @@ export const TIMELY_CATALOG: TopicBlueprint[] = [
         headline: "실거주 세제\n집주인 들어온대",
         coverImage: PHOTOS.apartmentNight,
         body: [
-          "비거주 1주택 보유세↑ → 직접 입주 유인 (8.3 이슈)",
-          "20억 이하도 임대물량 줄 수 있다는 분석 나옴",
-          "보유세를 월세·전세에 전가할 여지 — 갱신 협상 주의",
-          "세입자: 계약 만기 3개월 전 '갱신 vs 이사' 시뮬레이션",
-          "무주택: 전세 찾기보다 거주 안정·현금흐름 먼저",
+          "비거주 1주택 보유세↑ → 직접 입주 유인",
+          "20억 이하도 임대물량 줄 수 있다는 분석",
+          "보유세 전가·갱신 협상 — 만기 전 시뮬레이션",
         ],
-        highlight: "세법 + 임대시장 동시에 움직임 — 한 가지만 보면 손해",
+        highlight: "무주택은 전세보다 거주·현금흐름 먼저",
       },
     ],
     buildCaption: () =>
@@ -61,6 +59,9 @@ export const TIMELY_CATALOG: TopicBlueprint[] = [
         "실거주 세제, 전세·월세랑 겹치면 더 빡세져요.",
         "",
         "집주인 입주↑ → 전세 매물↓. 만기 전에 대안부터.",
+        "무주택은 전세 찾기보다 거주 안정·현금흐름 먼저.",
+        "",
+        "출처: 8.3 세법개편 · 국회",
       ].join("\n"),
   },
   {
@@ -78,13 +79,11 @@ export const TIMELY_CATALOG: TopicBlueprint[] = [
         headline: "종부세·양도세\n8월 윤곽",
         coverImage: PHOTOS.contract,
         body: [
-          "다주택·비거주 — 종부세·양도세 부담 강화 쪽 (윤곽)",
-          "1주택·실거주 — 상대적 변화 적을 수 있음 (케이스별)",
-          "갭투자·전세 끼고 보유 — 세금 + DSR 이중 압박",
-          "매도 타이밍: 1세대1주택·장특공·거주 요건 먼저 확인",
-          "세금만 보고 매도 X — 전세대출·DSR까지 같이",
+          "다주택·비거주 — 종부세·양도세 부담↑",
+          "1주택·실거주 — 상대적 변화 적을 수 있음",
+          "갭투자 — 세금 + DSR 이중 압박",
         ],
-        highlight: "실수요는 버티기 / 갭·다주택은 세금·대출 동시 체크",
+        highlight: "실수요 버티기 / 갭·다주택 세금·대출 동시 체크",
       },
     ],
     buildCaption: () =>
@@ -107,11 +106,9 @@ export const TIMELY_CATALOG: TopicBlueprint[] = [
         headline: "8월 청약\n놓치면 1년",
         coverImage: PHOTOS.construction,
         body: [
-          "3기 신도시·수도권 분양 일정 8월 몰림",
-          "청약통장 가점·순위·무주택 여부 재확인",
+          "3기 신도시·수도권 분양 8월 몰림",
+          "청약통장 가점·무주택 여부 재확인",
           "전매·실거주 의무 — 세법개편과 겹치면 리스크↑",
-          "청약 넣을 때 DSR·전세대출 잔액 같이 계산",
-          "당첨 ≠ 무조건 이득 — 월 상환·관리비 시뮬레이션 필수",
         ],
         highlight: "청약 = '싸게'보다 '버틸 현금흐름' 기준",
       },
@@ -132,7 +129,6 @@ export const TIMELY_CATALOG: TopicBlueprint[] = [
       {
         layout: "top10",
         headline: "월세화 빠른 동네\n서울 52% 돌파",
-        source: "Source · 국토부 8월 · 배경 데이터",
         top10Items: [
           { rank: 1, label: "마포·연남", note: "비아파트 월세화", value: "78%", highlight: true },
           { rank: 2, label: "성동·성수", note: "갱신↑ 전세↓", value: "65%" },
@@ -145,7 +141,7 @@ export const TIMELY_CATALOG: TopicBlueprint[] = [
       },
     ],
     buildCaption: () =>
-      ["서울 월세 52% — 숫자 확인용.", "", "8월 메인은 세법·정책. 이건 배경 데이터."].join("\n"),
+      ["서울 월세 52% — 숫자 확인용.", "", "8월 메인은 세법·정책. 이건 배경 데이터.", "", "출처: 국토부 8월"].join("\n"),
   },
   {
     id: "timely-trust-august",
@@ -160,7 +156,6 @@ export const TIMELY_CATALOG: TopicBlueprint[] = [
       {
         layout: "top10",
         headline: "안심신탁\n8월 Q&A TOP10",
-        source: "Source · HUG 8월 윤곽",
         top10Items: [
           { rank: 1, label: "연 4~5%?", note: "조건·한도", value: "?", highlight: true },
           { rank: 2, label: "전세금 안전", note: "공적 관리", value: "O" },

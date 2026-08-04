@@ -3,6 +3,42 @@
 @import "tailwindcss";
 
 @font-face {
+  font-family: "Cafe24Ssurround";
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2105_2@1.0/Cafe24Ssurround.woff")
+    format("woff");
+}
+
+@font-face {
+  font-family: "Paperlogy";
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2307@1.1/Paperlogy-8ExtraBold.woff2")
+    format("woff2");
+}
+
+@font-face {
+  font-family: "BookkMyungjo";
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2302@1.0/BookkMyungjo-Bold.woff2")
+    format("woff2");
+}
+
+@font-face {
+  font-family: "TmonMonsori";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/TmonMonsori.woff")
+    format("woff");
+}
+
+@font-face {
   font-family: "JalnanGothic";
   font-weight: 400;
   font-style: normal;
@@ -49,10 +85,10 @@
 
 :root {
   --font-pretendard: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --font-punch: "JalnanGothic", "GmarketSans", sans-serif;
-  --font-data: "SUIT", "GmarketSans", sans-serif;
-  --font-head: "GmarketSans", var(--font-pretendard);
-  --font-body: "MaruBuri", var(--font-pretendard);
+  --font-punch: "Cafe24Ssurround", "JalnanGothic", sans-serif;
+  --font-data: "TmonMonsori", "SUIT", sans-serif;
+  --font-head: "Paperlogy", "GmarketSans", sans-serif;
+  --font-body: "BookkMyungjo", "MaruBuri", serif;
   --background: #f5f2ec;
   --foreground: #1a1a1a;
 }

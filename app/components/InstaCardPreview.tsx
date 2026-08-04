@@ -6,6 +6,7 @@ import { BRAND_HANDLE } from "../lib/cardTypes";
 import {
   C,
   CARD_SAFE,
+  BRAND_ZONE,
   FONT_BODY,
   FONT_DATA,
   FONT_HEAD,
@@ -39,7 +40,7 @@ function BrandMark({ dark }: { dark?: boolean }) {
   return (
     <span
       className={"absolute z-20 text-[8px] font-bold tracking-wider " + (dark ? "text-black/30" : "text-white/45")}
-      style={{ right: CARD_SAFE.x, bottom: 14, fontFamily: FONT_HEAD }}
+      style={{ right: CARD_SAFE.x, bottom: 16, fontFamily: FONT_HEAD }}
     >
       {BRAND_HANDLE}
     </span>
@@ -56,23 +57,31 @@ type RankRow = {
   logoUrl?: string;
 };
 
+function CoverStrip({ src }: { src: string }) {
+  return (
+    <div className="h-[108px] w-full shrink-0 overflow-hidden">
+      <img src={src} alt="" crossOrigin="anonymous" className="h-full w-full object-cover" />
+    </div>
+  );
+}
+
 /** apt_lap — 흰 배경, 검은 pill, 큰 숫자 (SUIT) */
 function DataRankList({
   headline,
-  source,
   rows,
   footer,
+  coverImage,
 }: {
   headline: string;
-  source?: string;
   rows: RankRow[];
   footer?: string;
+  coverImage?: string;
 }) {
   const lines = headline.split("\n");
   return (
     <CardRoot className="bg-white">
+      {coverImage && <CoverStrip src={coverImage} />}
       <div style={pad()}>
-        {source && <p className="mb-2 text-[10px] font-bold text-[#888]" style={{ fontFamily: FONT_BODY }}>{source}</p>}
         <h1 className="whitespace-pre-line text-[28px] leading-[1.08] text-black" style={{ fontFamily: FONT_DATA }}>
           {lines[0]}
           {lines[1] && (
@@ -112,8 +121,8 @@ function DataRankList({
         })}
       </ul>
       {footer && (
-        <div className={INSET_X + " pb-10 pt-3"}>
-          <p className="text-[13px] font-bold leading-snug" style={{ fontFamily: FONT_BODY }}>{footer}</p>
+        <div className={INSET_X} style={{ paddingBottom: CARD_SAFE.bottom, paddingTop: 14 }}>
+          <p className="text-[16px] font-bold leading-[1.45]" style={{ fontFamily: FONT_BODY }}>{footer}</p>
         </div>
       )}
       <BrandMark dark />
@@ -124,14 +133,12 @@ function DataRankList({
 /** scan.real.data — 크림 + 네이비 헤더 + 라임 */
 function ScanRankList({
   headline,
-  source,
   rows,
   highlightRank,
   footer,
   coverImage,
 }: {
   headline: string;
-  source?: string;
   rows: RankRow[];
   highlightRank?: number;
   footer?: string;
@@ -141,13 +148,8 @@ function ScanRankList({
   const hl = highlightRank;
   return (
     <CardRoot className="bg-[#F5F0E6]">
-      {coverImage && (
-        <div className="h-[90px] shrink-0 overflow-hidden">
-          <img src={coverImage} alt="" crossOrigin="anonymous" className="h-full w-full object-cover" />
-        </div>
-      )}
+      {coverImage && <CoverStrip src={coverImage} />}
       <div className={INSET_X + " pt-4"}>
-        {source && <p className="mb-2 text-[9px] font-bold text-[#888]">{source}</p>}
         <div className="bg-[#1A1A1A] px-5 py-4">
           <h1 className="whitespace-pre-line text-[26px] leading-[1.1] text-white" style={{ fontFamily: FONT_PUNCH }}>
             {lines[0]}
@@ -183,7 +185,11 @@ function ScanRankList({
           );
         })}
       </ul>
-      {footer && <div className={INSET_X + " pb-10 pt-2 text-[12px] font-bold"}>{footer}</div>}
+      {footer && (
+        <div className={INSET_X} style={{ paddingBottom: CARD_SAFE.bottom, paddingTop: 12 }}>
+          <p className="text-[15px] font-bold">{footer}</p>
+        </div>
+      )}
       <BrandMark dark />
     </CardRoot>
   );
@@ -216,17 +222,52 @@ function PhotoFullSlide({ data }: { data: CardSlide }) {
   );
 }
 
-/** 실사 + 본문 패널 — 클리핑형 */
+/** photo-split — 1080×1080 기준 안전 치수 (잘림 방지) */
+function photoSplitLayout(bodyCount: number, hasHighlight: boolean) {
+  const load = bodyCount + (hasHighlight ? 1 : 0);
+  if (load <= 3) {
+    return { photoPct: 30, titleSize: 24, textSize: 14, gap: 8, hlSize: 13, hlPy: 8 };
+  }
+  if (load <= 4) {
+    return { photoPct: 26, titleSize: 22, textSize: 13, gap: 6, hlSize: 12, hlPy: 7 };
+  }
+  return { photoPct: 24, titleSize: 20, textSize: 12, gap: 5, hlSize: 12, hlPy: 6 };
+}
+
+/** 실사 + 본문 패널 — 클리핑형 (flex-shrink 금지, 그리드 고정) */
 function PhotoSplitSlide({ data }: { data: CardSlide }) {
   const img = data.coverImage ?? "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=900&q=80";
   const lines = data.headline.split("\n");
+  const hasHighlight = Boolean(data.highlight);
+  const maxBody = hasHighlight ? 3 : 4;
+  const bodyLines = (data.body ?? []).slice(0, maxBody);
+  const layout = photoSplitLayout(bodyLines.length, hasHighlight);
+  const bottomPad = CARD_SAFE.bottom + BRAND_ZONE;
+
   return (
     <CardRoot className="bg-[#1A2744]">
-      <div className="relative h-[44%] shrink-0 overflow-hidden">
-        <img src={img} alt="" crossOrigin="anonymous" className="h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#1A2744] via-black/30 to-transparent" />
-        <div className="absolute bottom-4 left-0 right-0" style={{ paddingLeft: CARD_SAFE.x, paddingRight: CARD_SAFE.x }}>
-          <h1 className="text-[30px] leading-[1.08] text-white" style={{ fontFamily: FONT_PUNCH }}>
+      <div
+        className="grid min-h-0 flex-1"
+        style={{ gridTemplateRows: `${layout.photoPct}% minmax(0, 1fr)` }}
+      >
+        <div className="relative overflow-hidden">
+          <img src={img} alt="" crossOrigin="anonymous" className="h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/10 to-[#1A2744]" />
+        </div>
+        <div
+          className="flex min-h-0 flex-col"
+          style={{
+            paddingLeft: CARD_SAFE.x,
+            paddingRight: CARD_SAFE.x,
+            paddingTop: 14,
+            paddingBottom: bottomPad,
+            gap: layout.gap,
+          }}
+        >
+          <h1
+            className="shrink-0 leading-[1.08] text-white"
+            style={{ fontFamily: FONT_PUNCH, fontSize: layout.titleSize }}
+          >
             {lines[0]}
             {lines[1] && (
               <>
@@ -235,24 +276,41 @@ function PhotoSplitSlide({ data }: { data: CardSlide }) {
               </>
             )}
           </h1>
-        </div>
-      </div>
-      <div className="flex min-h-0 flex-1 flex-col justify-between" style={pad()}>
-        <div className="space-y-3">
-          {data.body?.map((line, i) => (
-            <div key={i} className="flex gap-3">
-              <span className="shrink-0 text-[14px] font-bold text-[#CDFF00]" style={{ fontFamily: FONT_DATA }}>
+          {bodyLines.map((line, i) => (
+            <div key={i} className="flex shrink-0 items-start gap-2">
+              <span
+                className="shrink-0 font-bold tabular-nums leading-none text-[#CDFF00]"
+                style={{ fontFamily: FONT_DATA, fontSize: layout.textSize, width: 20, paddingTop: 2 }}
+              >
                 {String(i + 1).padStart(2, "0")}
               </span>
-              <p className="text-[15px] font-bold leading-[1.5] text-white/95">{line}</p>
+              <p
+                className="min-w-0 flex-1 font-bold text-white/95"
+                style={{
+                  fontFamily: FONT_BODY,
+                  fontSize: layout.textSize,
+                  lineHeight: 1.38,
+                  wordBreak: "keep-all",
+                }}
+              >
+                {line}
+              </p>
             </div>
           ))}
+          {data.highlight && (
+            <div
+              className="mt-auto shrink-0 rounded-md bg-[#CDFF00] px-3"
+              style={{ paddingTop: layout.hlPy, paddingBottom: layout.hlPy }}
+            >
+              <p
+                className="font-bold leading-[1.35] text-[#1A2744]"
+                style={{ fontFamily: FONT_BODY, fontSize: layout.hlSize, wordBreak: "keep-all" }}
+              >
+                {data.highlight}
+              </p>
+            </div>
+          )}
         </div>
-        {data.highlight && (
-          <div className="mt-4 rounded-md bg-[#CDFF00] px-4 py-3">
-            <p className="text-[14px] font-bold leading-snug text-[#1A2744]">{data.highlight}</p>
-          </div>
-        )}
       </div>
       <BrandMark />
     </CardRoot>
@@ -265,11 +323,10 @@ export function InstaCardPreview({ slide }: InstaCardPreviewProps) {
       return (slide.body?.length ?? 0) > 0 ? <PhotoSplitSlide data={slide} /> : <PhotoFullSlide data={slide} />;
     case "top10":
       return slide.accent === "light" ? (
-        <DataRankList headline={slide.headline} source={slide.source} rows={slide.top10Items ?? []} />
+        <DataRankList headline={slide.headline} rows={slide.top10Items ?? []} coverImage={slide.coverImage} />
       ) : (
         <ScanRankList
           headline={slide.headline}
-          source={slide.source}
           rows={slide.top10Items ?? []}
           highlightRank={slide.highlightRank}
           coverImage={slide.coverImage}
@@ -279,16 +336,15 @@ export function InstaCardPreview({ slide }: InstaCardPreviewProps) {
       return (
         <DataRankList
           headline={slide.headline}
-          source={slide.source}
           rows={slide.rows ?? []}
           footer={slide.highlight}
+          coverImage={slide.coverImage}
         />
       );
     case "unsold":
       return (
         <ScanRankList
           headline={slide.headline}
-          source={slide.source}
           rows={
             slide.topRegions?.map((r, i) => ({
               rank: i + 1,
@@ -312,7 +368,7 @@ export function InstaCardPreview({ slide }: InstaCardPreviewProps) {
     case "chart":
       return <ChartSlide data={slide} />;
     case "policy":
-      return <PolicySlide data={slide} />;
+      return (slide.body?.length ?? 0) > 0 ? <PhotoSplitSlide data={slide} /> : <PolicySlide data={slide} />;
     default:
       return null;
   }
@@ -349,7 +405,8 @@ function StorySlide({ data }: { data: CardSlide }) {
   const dark = (data.slideIndex ?? 1) % 2 === 0;
   return (
     <CardRoot className={dark ? "bg-[#1A2744]" : "bg-white"}>
-      <div className="flex min-h-0 flex-1 flex-col justify-between" style={pad()}>
+      {data.coverImage && <CoverStrip src={data.coverImage} />}
+      <div className="flex min-h-0 flex-1 flex-col justify-between" style={{ ...pad(), paddingBottom: CARD_SAFE.bottom }}>
         <h2
           className={"text-[28px] leading-[1.12] " + (dark ? "text-white" : "text-black")}
           style={{ fontFamily: FONT_HEAD }}
@@ -358,14 +415,14 @@ function StorySlide({ data }: { data: CardSlide }) {
         </h2>
         <div className="my-5 space-y-4">
           {data.body?.map((line, i) => (
-            <p key={i} className={"text-[16px] font-bold leading-[1.55] " + (dark ? "text-white/92" : "text-[#222]")}>
+            <p key={i} className={"text-[17px] font-bold leading-[1.55] " + (dark ? "text-white/92" : "text-[#222]")}>
               {line}
             </p>
           ))}
         </div>
         {data.highlight && (
-          <div className={"rounded-md px-4 py-3 " + (dark ? "bg-[#CDFF00]" : "bg-black")}>
-            <p className={"text-[14px] font-bold " + (dark ? "text-[#1A2744]" : "text-[#CDFF00]")}>{data.highlight}</p>
+          <div className={"shrink-0 rounded-md px-4 py-3.5 " + (dark ? "bg-[#CDFF00]" : "bg-black")}>
+            <p className={"text-[15px] font-bold leading-[1.45] " + (dark ? "text-[#1A2744]" : "text-[#CDFF00]")}>{data.highlight}</p>
           </div>
         )}
       </div>
@@ -471,9 +528,9 @@ function LineChart({ series, color, label }: { series: ChartPoint[]; color: stri
 function ChartSlide({ data }: { data: CardSlide }) {
   return (
     <CardRoot className="bg-white">
-      <div style={pad()}>
+      {data.coverImage && <CoverStrip src={data.coverImage} />}
+      <div className="flex min-h-0 flex-1 flex-col" style={{ ...pad(), paddingBottom: CARD_SAFE.bottom }}>
         <h1 className="whitespace-pre-line text-[26px] leading-[1.1]" style={{ fontFamily: FONT_HEAD }}>{data.headline}</h1>
-        {data.source && <p className="mt-1 text-[10px] text-[#888]">{data.source}</p>}
         {data.priceSeries && data.priceLabel && <LineChart series={data.priceSeries} color={C.black} label={data.priceLabel} />}
         {data.supplySeries && data.supplyLabel && <LineChart series={data.supplySeries} color={C.coral} label={data.supplyLabel} />}
         {data.conclusion && (

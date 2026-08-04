@@ -12,18 +12,20 @@ export const C = {
   grayLine: "#DDDDDD",
 } as const;
 
-/** 실사 풀커버·후킹 — Jalnan (통통 튀는 카드뉴스) */
-export const FONT_PUNCH = '"JalnanGothic", "GmarketSans", sans-serif';
+/** 카드 하단 @handle · 본문 여백 */
+export const CARD_SAFE = { x: 28, top: 20, bottom: 64 } as const;
+export const BRAND_ZONE = 22;
 
-/** apt_lap 순위·숫자 — SUIT ExtraBold */
-export const FONT_DATA = '"SUIT", "GmarketSans", sans-serif';
+/** 실사 풀커버·후킹 — Cafe24 써라운드 (SNS 카드뉴스) */
+export const FONT_PUNCH = '"Cafe24Ssurround", "JalnanGothic", sans-serif';
 
-/** 스토리 헤드 — Gmarket Sans Bold */
-export const FONT_HEAD = '"GmarketSans", "Pretendard", sans-serif';
+/** apt_lap 순위·숫자 — Tmon Monsori */
+export const FONT_DATA = '"TmonMonsori", "SUIT", sans-serif';
 
-/** 본문 — MaruBuri Bold */
-export const FONT_BODY = '"MaruBuri", "Pretendard", sans-serif';
+/** 스토리 헤드 — Paperlogy */
+export const FONT_HEAD = '"Paperlogy", "GmarketSans", sans-serif';
 
-export const CARD_SAFE = { x: 28, top: 24, bottom: 40 } as const;
+/** 본문 — BookkMyungjo (명조 — 흔한 고딕과 차별) */
+export const FONT_BODY = '"BookkMyungjo", "MaruBuri", serif';
 
 export const INSET_X = "px-7";
