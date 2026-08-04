@@ -71,6 +71,8 @@ export function InstaCardPreview({ slide }: InstaCardPreviewProps) {
   switch (slide.layout) {
     case "hook":
       return <HookSlide data={slide} />;
+    case "photo-hook":
+      return <PhotoHookSlide data={slide} />;
     case "story":
       return <StorySlide data={slide} />;
     case "insight":
@@ -85,6 +87,8 @@ export function InstaCardPreview({ slide }: InstaCardPreviewProps) {
       return <PolicySlide data={slide} />;
     case "unsold":
       return <UnsoldSlide data={slide} />;
+    case "top10":
+      return <Top10Slide data={slide} />;
     default:
       return null;
   }
@@ -93,11 +97,130 @@ export function InstaCardPreview({ slide }: InstaCardPreviewProps) {
 function BrandMark() {
   return (
     <span
+      className="absolute bottom-5 right-6 z-10 text-[8px] tracking-[0.2em] text-white/50"
+      style={{ fontFamily: FONT_BODY }}
+    >
+      {BRAND_HANDLE}
+    </span>
+  );
+}
+
+function BrandMarkDark() {
+  return (
+    <span
       className="absolute bottom-5 right-6 text-[8px] tracking-[0.2em] text-black/30"
       style={{ fontFamily: FONT_BODY }}
     >
       {BRAND_HANDLE}
     </span>
+  );
+}
+
+/** 기사 베스트댓글·무한도전식 리액션 */
+function CommentBubble({ comment, reaction }: { comment?: string; reaction?: string }) {
+  if (!comment && !reaction) return null;
+  return (
+    <div className="relative z-10 mt-3 max-w-[92%]">
+      {reaction && (
+        <p
+          className="mb-1 text-[10px] tracking-wide text-[#D4A017]"
+          style={{ fontFamily: FONT_BODY }}
+        >
+          {reaction}
+        </p>
+      )}
+      {comment && (
+        <div
+          className="rounded-sm bg-white px-3 py-2 text-[11px] leading-[1.45] text-[#1A1A1A] shadow-md"
+          style={{ fontFamily: FONT_BODY }}
+        >
+          <span className="text-black/35">💬 </span>
+          {comment}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function LogoStrip({ urls }: { urls?: string[] }) {
+  if (!urls?.length) return null;
+  return (
+    <div className="absolute right-4 top-4 z-10 flex gap-2">
+      {urls.slice(0, 3).map((src) => (
+        <img
+          key={src}
+          src={src}
+          alt=""
+          crossOrigin="anonymous"
+          className="h-7 w-auto max-w-[48px] object-contain bg-white/90 p-1"
+        />
+      ))}
+    </div>
+  );
+}
+
+/** 실사·로고 커버 — 1장 후킹 */
+function PhotoHookSlide({ data }: { data: CardSlide }) {
+  return (
+    <CardRoot className="bg-[#111] text-white">
+      {data.coverImage && (
+        <img
+          src={data.coverImage}
+          alt=""
+          crossOrigin="anonymous"
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+      )}
+      <div className="absolute inset-0 bg-black/55" />
+      <LogoStrip urls={data.logoImages} />
+      <div className="relative z-[1] flex flex-1 flex-col justify-end px-7 pb-14 pt-10">
+        {data.subheadline && (
+          <Body className="mb-2 text-[11px] text-white/65">{data.subheadline}</Body>
+        )}
+        <Display as="h1" className="whitespace-pre-line text-[32px] leading-[1.06] text-white">
+          {data.headline}
+        </Display>
+        <CommentBubble comment={data.bestComment} reaction={data.reactionLine} />
+      </div>
+      <BrandMark />
+    </CardRoot>
+  );
+}
+
+/** TOP10 — 비대칭 순위 */
+function Top10Slide({ data }: { data: CardSlide }) {
+  return (
+    <CardRoot className="bg-[#FAF8F4]">
+      <div className="px-6 pb-3 pt-8">
+        <Display className="text-[22px] leading-tight">{data.headline}</Display>
+        {data.subheadline && (
+          <Body className="mt-1 text-[11px] text-[#C0392B]">{data.subheadline}</Body>
+        )}
+      </div>
+      <ul className="flex-1 overflow-hidden px-4 pb-12">
+        {data.top10Items?.map((item, i) => (
+          <li
+            key={item.rank}
+            className="flex items-baseline gap-2 border-b border-black/8 py-2"
+            style={{ paddingLeft: (i % 3) * 6 }}
+          >
+            <Display as="span" className="w-7 shrink-0 text-[22px] tabular-nums text-black/18">
+              {item.rank}
+            </Display>
+            <div className="min-w-0 flex-1">
+              <Body className="text-[13px] font-bold">{item.label}</Body>
+              <Body className="text-[10px] text-black/45">{item.note}</Body>
+            </div>
+          </li>
+        ))}
+      </ul>
+      {data.bestComment && (
+        <div className="absolute bottom-12 left-5 right-5">
+          <CommentBubble comment={data.bestComment} />
+        </div>
+      )}
+      <BrandMarkDark />
+    </CardRoot>
   );
 }
 
@@ -120,7 +243,6 @@ function WinnerLoserList({ items }: { items?: WinnerLoser[]; invert?: boolean })
 
 /** 표지 — 종이 질감, 제목 좌하단 치우침 */
 function HookSlide({ data }: { data: CardSlide }) {
-  const s = seed(data);
   return (
     <CardRoot className="bg-[#F4F0E8]">
       <div
@@ -135,11 +257,9 @@ function HookSlide({ data }: { data: CardSlide }) {
           {data.headline}
         </Display>
         <Rule w="w-10" className="mt-5" />
-        <Body className="mt-3 text-[11px] text-black/40">
-          {(s % 3) + 2}분 읽기
-        </Body>
+        <CommentBubble comment={data.bestComment} reaction={data.reactionLine} />
       </div>
-      <BrandMark />
+      <BrandMarkDark />
     </CardRoot>
   );
 }
@@ -173,7 +293,7 @@ function StorySlide({ data }: { data: CardSlide }) {
             )}
           </div>
         </div>
-        <BrandMark />
+        <BrandMarkDark />
       </CardRoot>
     );
   }
@@ -225,7 +345,7 @@ function StorySlide({ data }: { data: CardSlide }) {
           </Display>
         )}
       </div>
-      <BrandMark />
+      <BrandMarkDark />
     </CardRoot>
   );
 }
@@ -284,7 +404,7 @@ function InsightSlide({ data }: { data: CardSlide }) {
             </div>
           )}
         </div>
-        <BrandMark />
+        <BrandMarkDark />
       </CardRoot>
     );
   }
@@ -312,7 +432,7 @@ function InsightSlide({ data }: { data: CardSlide }) {
         )}
         <WinnerLoserList items={data.winnersLosers} />
       </div>
-      <BrandMark />
+      <BrandMarkDark />
     </CardRoot>
   );
 }
@@ -383,7 +503,7 @@ function CalendarSlide({ data }: { data: CardSlide }) {
           })}
         </div>
       </div>
-      <BrandMark />
+      <BrandMarkDark />
     </CardRoot>
   );
 }
@@ -442,7 +562,7 @@ function ChartSlide({ data }: { data: CardSlide }) {
         )}
         <WinnerLoserList items={data.winnersLosers} />
       </div>
-      <BrandMark />
+      <BrandMarkDark />
     </CardRoot>
   );
 }
@@ -488,7 +608,7 @@ function RankingSlide({ data }: { data: CardSlide }) {
           {data.highlight}
         </Body>
       )}
-      <BrandMark />
+      <BrandMarkDark />
     </CardRoot>
   );
 }
@@ -538,7 +658,7 @@ function PolicySlide({ data }: { data: CardSlide }) {
       {data.highlight && (
         <Body className="mx-7 mb-12 text-[12px] italic leading-[1.5]">{data.highlight}</Body>
       )}
-      <BrandMark />
+      <BrandMarkDark />
     </CardRoot>
   );
 }
@@ -580,7 +700,7 @@ function UnsoldSlide({ data }: { data: CardSlide }) {
       {data.conclusion && (
         <Body className="mx-7 mb-12 text-[12px] leading-[1.55]">{data.conclusion}</Body>
       )}
-      <BrandMark />
+      <BrandMarkDark />
     </CardRoot>
   );
 }

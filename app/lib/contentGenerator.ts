@@ -18,7 +18,7 @@ function buildUnsoldSlides(region: string): CardSlide[] {
         rate: `${t.unsoldRate.toFixed(1)}%`,
       })),
       highlight: insight,
-      conclusion: `${top[0]?.district ?? region} 미분양률 ${top[0]?.unsoldRate.toFixed(1) ?? "-"}% — 2040은 분양·입주 타이밍 주의`,
+      conclusion: `${top[0]?.district ?? region} 미분양률 ${top[0]?.unsoldRate.toFixed(1) ?? "-"}% — 분양·입주 타이밍 주의`,
       source: "국토교통부 미분양 현황",
       accent: "light",
     },
@@ -28,7 +28,7 @@ function buildUnsoldSlides(region: string): CardSlide[] {
 function buildUnsoldCaption(region: string, slides: CardSlide[]): string {
   const slide = slides[0];
   const lines = [
-    `${region} 미분양 TOP 3 — 2040 주목 구역만 쏙! 👀`,
+    `${region} 미분양 TOP 3 — 주목 구역만 쏙!`,
     "",
     ...(slide?.topRegions?.map(
       (r, i) => `${i + 1}. ${r.name} — ${r.rate} (${r.count.toLocaleString()}호)`,
@@ -44,7 +44,7 @@ export function generateFromTopic(
   topic: SuggestedTopic,
   date: string,
 ): GeneratedContent {
-  const bp = findBlueprint(topic.blueprintId, date);
+  const bp = findBlueprint(topic.blueprintId, date, topic.category);
   if (!bp) {
     throw new Error("주제를 찾을 수 없습니다.");
   }

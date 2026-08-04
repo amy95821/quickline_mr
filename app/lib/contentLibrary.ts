@@ -71,7 +71,7 @@ const DSR_STORY: TopicBlueprint = {
     },
     {
       layout: "story",
-      headline: "2040 월급쟁이 현실",
+      headline: "월급쟁이 현실",
       body: [
         "연봉 대비 DSR 여유 없으면 매수 미루기",
         "전세 깨지면 월세 전환 = 월급 새어나감",
@@ -122,7 +122,7 @@ const MY_HOME_REALITY: TopicBlueprint = {
     {
       layout: "insight",
       headline: "내 집 마련?\n일단 원룸부터",
-      subheadline: "2040 40%가 혼자 사는데",
+      subheadline: "혼자 사는 사람 40%",
       body: [
         "첫 목표는 '아파트 소유'가 아님",
         "전세·월세로 거주비 고정 → 저축 → 그다음",
@@ -196,7 +196,7 @@ const JEONWOLSE_STORY: TopicBlueprint = {
     {
       layout: "hook",
       headline: "전세 깨지면\n월세 각오?",
-      subheadline: "2040, 지금 어느 쪽이 이득?",
+      subheadline: "지금 어느 쪽이 이득?",
       accent: "dark",
       slideIndex: 1,
       totalSlides: 4,
@@ -373,7 +373,7 @@ const RETIRE_STORY: TopicBlueprint = {
     {
       layout: "hook",
       headline: "65세에\n월 300만원?",
-      subheadline: "2040, 지금부터 얼마 모아야 하나",
+      subheadline: "지금부터 얼마 모아야 하나",
       accent: "dark",
       slideIndex: 1,
       totalSlides: 4,
@@ -435,7 +435,7 @@ const HOUSING_POLICY: TopicBlueprint = {
     {
       layout: "policy",
       headline: "국회 부동산\n7,500건 민원",
-      subheadline: "2040한테 걸리는 건 이 3가지",
+      subheadline: "우리한테 걸리는 건 이 3가지",
       source: "국토부 · 기재부 · 금융위",
       people: [
         { name: "국토부", role: "주택공급", stat: "2,381", statLabel: "건 (32%)" },
@@ -473,7 +473,7 @@ const DSR_POLICY_STORY: TopicBlueprint = {
     {
       layout: "hook",
       headline: "정부 DSR\n또 바뀐다",
-      subheadline: "2040, 나한테 뭐가 달라지나",
+      subheadline: "나한테 뭐가 달라지나",
       accent: "dark",
       slideIndex: 1,
       totalSlides: 5,
@@ -514,7 +514,7 @@ const DSR_POLICY_STORY: TopicBlueprint = {
     },
     {
       layout: "insight",
-      headline: "2040 액션",
+      headline: "지금 액션",
       highlight: "정책 따라 '매수'보다 '버티기'",
       body: ["무주택·저축·전세 안정 우선", "급매수는 손해 볼 확률↑"],
       accent: "green",
@@ -597,7 +597,7 @@ const BRAND_COMPARE: TopicBlueprint = {
     },
     {
       layout: "story",
-      headline: "2040이 볼 것",
+      headline: "볼 것",
       body: ["실거래가·전세가율", "입주물량·미분양", "역세권·학군"],
       slideIndex: 3,
       totalSlides: 4,
@@ -651,7 +651,7 @@ const ECONOMY_TAX: TopicBlueprint = {
       {
         layout: "insight",
         headline: `${m}월 세금,\n놓치면 가산세`,
-        subheadline: "2040 필수 마감일",
+        subheadline: "이번 달 필수 마감일",
         body: [
           "종합부동산세 · 9월 정기분 신고",
           "취득세 · 매수 후 60일 이내",
@@ -683,7 +683,7 @@ const ASSEMBLY_LAND: TopicBlueprint = {
     {
       layout: "hook",
       headline: "국회 부동산법\n통과?",
-      subheadline: "2040한테 뭐가 바뀌나",
+      subheadline: "우리한테 뭐가 바뀌나",
       accent: "dark",
       slideIndex: 1,
       totalSlides: 4,
@@ -703,7 +703,7 @@ const ASSEMBLY_LAND: TopicBlueprint = {
     },
     {
       layout: "story",
-      headline: "2040 영향",
+      headline: "우리한테 영향",
       body: [
         "전세사기 특별법 → 보증금 반환 절차 단축",
         "DSR 3단계 → 추가 대출 어려움",
@@ -742,7 +742,7 @@ const TAX_REFORM: TopicBlueprint = {
     {
       layout: "policy",
       headline: "세제개편\n7월 나온다",
-      subheadline: "2040, 급하게 움직이지 말 것",
+      subheadline: "급하게 움직이지 말 것",
       people: [
         { name: "기재부", role: "종부세", stat: "강화", statLabel: "다주택" },
         { name: "기재부", role: "취득세", stat: "LTV", statLabel: "연계" },
@@ -809,7 +809,7 @@ const BRAND_CHECKLIST: TopicBlueprint = {
     {
       layout: "insight",
       headline: "브랜드만\n믿지 마",
-      subheadline: "2040 아파트 고를 때 5가지",
+      subheadline: "아파트 고를 때 5가지",
       body: [
         "① 실거래가·전세가율 (네이버·국토부)",
         "② 입주물량·미분양 (공급 압력)",

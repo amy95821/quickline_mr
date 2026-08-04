@@ -150,7 +150,7 @@ export default function Home() {
               EasyEcon PostMaker
             </p>
             <h1 className="mt-1 text-lg font-semibold tracking-tight">
-              2040 · 부동산·경제 카드뉴스
+              부동산·경제 카드뉴스
             </h1>
           </div>
           <span className="text-[11px] text-black/35">{BRAND_HANDLE}</span>
@@ -186,7 +186,7 @@ export default function Home() {
 
           <section>
             <div className="mb-3 flex items-center justify-between">
-              <Field label="오늘의 주제 · 4개" />
+              <Field label="오늘의 주제 · 4+TOP10" />
               <button
                 type="button"
                 onClick={() => void loadTopics()}
@@ -197,7 +197,7 @@ export default function Home() {
               </button>
             </div>
             <p className="mb-4 text-xs leading-relaxed text-black/45">
-              인사이트 중심 · 2개는 스토리(캐러셀) · 한 장에 내용 완결
+              매일 다른 4개 + TOP10 1개 · 1~2개는 실사 커버 · 시의성 이슈 반영
             </p>
             <ul className="space-y-3">
               {topics.map((t) => (
@@ -213,8 +213,18 @@ export default function Home() {
                       selected?.id === t.id ? "opacity-100" : "opacity-55 hover:opacity-80"
                     }`}
                   >
-                    <span className="text-[10px] tracking-wide text-black/40">
-                      {FORMAT_LABELS[t.format]}
+                    <span className="flex flex-wrap items-center gap-1.5 text-[10px] tracking-wide text-black/40">
+                      {t.isTop10 ? (
+                        <span className="bg-[#C0392B] px-1.5 py-0.5 text-white">TOP10</span>
+                      ) : (
+                        <span>{FORMAT_LABELS[t.format]}</span>
+                      )}
+                      {t.hasPhotoCover && (
+                        <span className="border border-black/20 px-1 py-0.5">실사 커버</span>
+                      )}
+                      {t.timelinessTag && (
+                        <span className="text-[#C0392B]">{t.timelinessTag}</span>
+                      )}
                     </span>
                     <p className="mt-1 text-[12px] font-medium leading-relaxed text-black/80">
                       {t.summary}

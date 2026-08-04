@@ -9,13 +9,15 @@ export type ContentFormat = "single" | "carousel";
 
 export type SlideLayout =
   | "hook"
+  | "photo-hook"
   | "story"
   | "insight"
   | "calendar"
   | "chart"
   | "ranking"
   | "policy"
-  | "unsold";
+  | "unsold"
+  | "top10";
 
 export interface CalendarEvent {
   day: number;
@@ -73,6 +75,15 @@ export interface CardSlide {
   people?: PolicyPerson[];
   region?: string;
   topRegions?: { name: string; count: number; rate: string }[];
+  /** 실사 배경 URL */
+  coverImage?: string;
+  /** 건설사·기관 로고 URL 배열 */
+  logoImages?: string[];
+  /** 기사 베스트댓글 스타일 */
+  bestComment?: string;
+  /** 무한도전식 리액션 한줄 */
+  reactionLine?: string;
+  top10Items?: { rank: number; label: string; note: string }[];
 }
 
 export interface GeneratedContent {
@@ -122,6 +133,7 @@ export const FORMAT_LABELS: Record<ContentFormat, string> = {
 
 export const LAYOUT_LABELS: Record<SlideLayout, string> = {
   hook: "후킹",
+  "photo-hook": "실사 커버",
   story: "전개",
   insight: "인사이트",
   calendar: "달력",
@@ -129,4 +141,5 @@ export const LAYOUT_LABELS: Record<SlideLayout, string> = {
   ranking: "순위",
   policy: "정책",
   unsold: "미분양",
+  top10: "TOP10",
 };
