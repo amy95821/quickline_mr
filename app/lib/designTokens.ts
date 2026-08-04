@@ -1,18 +1,29 @@
-/** 플랫 컬러 — 그라데이션 없음 */
+/** apt_lap · scan.real.data · 인스타 실사 커버 — 레이아웃별 팔레트 */
 export const C = {
-  blue: "#2B5F8C",
-  blueDeep: "#1E3A5F",
-  green: "#3D6B4F",
-  cream: "#F4F0E8",
-  paper: "#FAF8F4",
+  black: "#0A0A0A",
+  navy: "#1A2744",
+  cream: "#F7F4EF",
+  sand: "#EDE8DF",
   white: "#FFFFFF",
-  ink: "#1A1A1A",
-  black: "#111111",
-  coral: "#C0392B",
-  yellow: "#D4A017",
-  gray: "#6B6B6B",
-  rule: "#1A1A1A",
+  lime: "#CDFF00",
+  coral: "#FF4757",
+  ink: "#111111",
+  muted: "#666666",
+  grayLine: "#DDDDDD",
 } as const;
 
-export const FONT_DISPLAY = '"RIDIBatang", "Georgia", serif';
+/** 실사 풀커버·후킹 — Jalnan (통통 튀는 카드뉴스) */
+export const FONT_PUNCH = '"JalnanGothic", "GmarketSans", sans-serif';
+
+/** apt_lap 순위·숫자 — SUIT ExtraBold */
+export const FONT_DATA = '"SUIT", "GmarketSans", sans-serif';
+
+/** 스토리 헤드 — Gmarket Sans Bold */
+export const FONT_HEAD = '"GmarketSans", "Pretendard", sans-serif';
+
+/** 본문 — MaruBuri Bold */
 export const FONT_BODY = '"MaruBuri", "Pretendard", sans-serif';
+
+export const CARD_SAFE = { x: 28, top: 24, bottom: 40 } as const;
+
+export const INSET_X = "px-7";

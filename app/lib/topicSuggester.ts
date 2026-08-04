@@ -1,4 +1,4 @@
-import type { Category, ContentFormat } from "./cardTypes";
+import type { Category, ContentFormat, CoverStyle } from "./cardTypes";
 import { resolveBlueprint as resolveStatic } from "./contentLibrary";
 import { buildTop10Blueprint } from "./top10Library";
 import { getTimelyTopicsForMonth } from "./timelyTopics";
@@ -14,7 +14,8 @@ export interface SuggestedTopic {
   searchQueries: string[];
   unsoldRegion?: string;
   isTop10?: boolean;
-  hasPhotoCover?: boolean;
+  coverStyle?: CoverStyle;
+  slotLabel?: string;
   timelinessTag?: string;
 }
 
@@ -24,7 +25,7 @@ export async function suggestDailyTopics(
 ): Promise<SuggestedTopic[]> {
   const picks = getDailyTopicPicks(category, date);
 
-  return picks.map(({ blueprint: bp, isTop10, hasPhotoCover, timelinessTag }) => ({
+  return picks.map(({ blueprint: bp, isTop10, coverStyle, timelinessTag, slotLabel }) => ({
     id: `${date}-${bp.id}`,
     blueprintId: bp.id,
     category: bp.category,
@@ -33,8 +34,9 @@ export async function suggestDailyTopics(
     searchQueries: bp.searchQueries,
     unsoldRegion: bp.unsoldRegion,
     isTop10,
-    hasPhotoCover,
-    timelinessTag,
+    coverStyle,
+    slotLabel,
+    timelinessTag: timelinessTag ?? slotLabel,
   }));
 }
 
@@ -50,8 +52,7 @@ export function findBlueprint(
   if (timely) return timely;
 
   if (blueprintId.startsWith("top10-") && category) {
-    const top10 = buildTop10Blueprint(category, date);
-    if (top10.id === blueprintId) return top10;
+    return buildTop10Blueprint(category, date, blueprintId);
   }
 
   return undefined;

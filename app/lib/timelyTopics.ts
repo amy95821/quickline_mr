@@ -1,163 +1,188 @@
 import type { TopicBlueprint } from "./contentLibrary";
-import { pickHumor } from "./humorSnippets";
-import { PHOTOS, BUILDER_LOGOS } from "./cardImages";
+import { PHOTOS } from "./cardImages";
 
-/** 2026년 8월 시사성 토픽 — 데일리 풀에 주입 */
-export const TIMELY_AUG2026: TopicBlueprint[] = [
+/** 8월 2026 — 포맷·테마·본문 각각 다르게 */
+export const TIMELY_CATALOG: TopicBlueprint[] = [
   {
-    id: "timely-wolse-52",
+    id: "timely-tax-reform-aug",
     category: "부동산",
-    format: "carousel",
-    summary:
-      "8.3 국토부·머니투데이 — 서울 아파트 월세 비중 52% 역대 첫 돌파. '사라진 전세' + 실거주 세제 여파 4장 스토리",
-    searchQueries: ["서울 월세 52%", "전세 월세화 2026", "실거주 세제"],
+    format: "single",
+    theme: "tax",
+    coverStyle: "full-photo",
+    photoKey: "officeTower",
+    summary: "8.3 세법개편 — 실거주·종부세·양도세·취득세, 30대 무주택·1주택자가 지금 확인할 것",
+    searchQueries: ["세법개편 2026", "실거주 세제", "종부세 8월"],
     buildSlides: () => [
       {
         layout: "photo-hook",
-        headline: "전세\n사라졌대요",
-        subheadline: "서울 월세 52% · 8월 국토부",
-        coverImage: PHOTOS.apartmentNight,
-        bestComment: "전세 매물 0건… 새로고침만 47번 ㅋㅋ",
-        reactionLine: "무한 새로고침",
+        headline: "8월 세법개편\n지금 뭐가 바뀌나",
+        coverImage: PHOTOS.officeTower,
         accent: "dark",
-        slideIndex: 1,
-        totalSlides: 4,
-      },
-      {
-        layout: "story",
-        headline: "숫자가 말해줌",
-        body: [
-          "서울 아파트 임대 거래 중 월세 52% — 처음",
-          "비아파트는 월세 78% 육박",
-          "전세 매물↓ + 갱신↑ = 신규 전세 어려움",
-        ],
-        highlight: "실거주 세제 → 집주인 직접 입주↑",
-        slideIndex: 2,
-        totalSlides: 4,
-      },
-      {
-        layout: "story",
-        headline: "월급쟁이 체감",
-        body: [
-          "전세→월세 전환 = 월 40만+ 추가 (1억 기준)",
-          "반전세 제안 늘어남",
-          "20억 이하도 임대물량 줄 수 있음",
-        ],
-        slideIndex: 3,
-        totalSlides: 4,
-      },
-      {
-        layout: "insight",
-        headline: "그래서\n지금은",
-        highlight: "전세 찾기보다 '월 현금흐름' 먼저 계산",
-        body: ["계약 만기 3개월 전부터 대안", "안심신탁 조건 8월 확인"],
-        accent: "green",
-        slideIndex: 4,
-        totalSlides: 4,
       },
     ],
-    buildCaption: () => {
-      const h = pickHumor("timely", 1);
-      return [
-        "서울 월세 52% 돌파 — 전세 '사라진' 거 실감하시죠?",
+    buildCaption: () =>
+      [
+        "8.3 세법개편안 나왔어요. 부동산 판 바뀌는 타이밍.",
         "",
-        "8월 국토부 통계: 아파트 월세 비중 52%, 비아파트 78%.",
-        "실거주 세제 + 전세대출 DSR → 집주인 입주·월세 전환 가속.",
+        "① 실거주 중심 — 비거주 1주택 보유세↑, 집주인 직접 입주 유인",
+        "② 종부세·양도세 — 다주택·갭투자 부담↑ / 1주택 실수요는 상대적 유리",
+        "③ 취득세·LTV — 급매수·급매도 전 시행일·공포일 확인",
+        "④ 임대소득·전세 — 보유세 전가 → 월세·전세난 겹칠 수 있음",
         "",
-        h.bestComment ? `💬 "${h.bestComment}"` : "",
+        "발표 ≠ 즉시 시행. 8월 국회 일정·시행일 캘린더부터 저장.",
+      ].join("\n"),
+  },
+  {
+    id: "timely-live-in-tax",
+    category: "부동산",
+    format: "single",
+    theme: "tax",
+    coverStyle: "photo-split",
+    photoKey: "apartmentNight",
+    summary: "실거주 세제 — 집주인 입주↑ 전세 물량↓, 세입자·무주택 30대 체크리스트",
+    searchQueries: ["실거주 세제", "종부세", "비거주 1주택"],
+    buildSlides: () => [
+      {
+        layout: "photo-hook",
+        headline: "실거주 세제\n집주인 들어온대",
+        coverImage: PHOTOS.apartmentNight,
+        body: [
+          "비거주 1주택 보유세↑ → 직접 입주 유인 (8.3 이슈)",
+          "20억 이하도 임대물량 줄 수 있다는 분석 나옴",
+          "보유세를 월세·전세에 전가할 여지 — 갱신 협상 주의",
+          "세입자: 계약 만기 3개월 전 '갱신 vs 이사' 시뮬레이션",
+          "무주택: 전세 찾기보다 거주 안정·현금흐름 먼저",
+        ],
+        highlight: "세법 + 임대시장 동시에 움직임 — 한 가지만 보면 손해",
+      },
+    ],
+    buildCaption: () =>
+      [
+        "실거주 세제, 전세·월세랑 겹치면 더 빡세져요.",
         "",
-        "👉 스와이프해서 숫자·대응법 확인",
-      ]
-        .filter(Boolean)
-        .join("\n");
-    },
+        "집주인 입주↑ → 전세 매물↓. 만기 전에 대안부터.",
+      ].join("\n"),
+  },
+  {
+    id: "timely-jongbu-yangdo-aug",
+    category: "부동산",
+    format: "single",
+    theme: "tax",
+    coverStyle: "photo-split",
+    photoKey: "contract",
+    summary: "종부세·양도세 8월 윤곽 — 1주택 실수요 vs 다주택·갭투자 세금 비교",
+    searchQueries: ["종부세 2026", "양도세 1주택", "다주택 세금"],
+    buildSlides: () => [
+      {
+        layout: "photo-hook",
+        headline: "종부세·양도세\n8월 윤곽",
+        coverImage: PHOTOS.contract,
+        body: [
+          "다주택·비거주 — 종부세·양도세 부담 강화 쪽 (윤곽)",
+          "1주택·실거주 — 상대적 변화 적을 수 있음 (케이스별)",
+          "갭투자·전세 끼고 보유 — 세금 + DSR 이중 압박",
+          "매도 타이밍: 1세대1주택·장특공·거주 요건 먼저 확인",
+          "세금만 보고 매도 X — 전세대출·DSR까지 같이",
+        ],
+        highlight: "실수요는 버티기 / 갭·다주택은 세금·대출 동시 체크",
+      },
+    ],
+    buildCaption: () =>
+      ["종부세·양도세 8월 윤곽 — 다주택 vs 1주택 갈림.", "", "실수요는 버티기, 갭·다주택은 세금·DSR 동시."].join(
+        "\n",
+      ),
+  },
+  {
+    id: "timely-cheongyak-aug",
+    category: "부동산",
+    format: "single",
+    theme: "calendar",
+    coverStyle: "photo-split",
+    photoKey: "construction",
+    summary: "8월 청약 캘린더 — 3기 신도시·수도권 분양, 무주택 30대 체크",
+    searchQueries: ["8월 청약", "3기 신도시", "청약 2026"],
+    buildSlides: () => [
+      {
+        layout: "photo-hook",
+        headline: "8월 청약\n놓치면 1년",
+        coverImage: PHOTOS.construction,
+        body: [
+          "3기 신도시·수도권 분양 일정 8월 몰림",
+          "청약통장 가점·순위·무주택 여부 재확인",
+          "전매·실거주 의무 — 세법개편과 겹치면 리스크↑",
+          "청약 넣을 때 DSR·전세대출 잔액 같이 계산",
+          "당첨 ≠ 무조건 이득 — 월 상환·관리비 시뮬레이션 필수",
+        ],
+        highlight: "청약 = '싸게'보다 '버틸 현금흐름' 기준",
+      },
+    ],
+    buildCaption: () =>
+      ["8월 청약 촘촘 — 무주택이면 캘린더 필수.", "", "세법·DSR 바뀌는 타이밍, 현금흐름부터."].join("\n"),
+  },
+  {
+    id: "timely-wolse-52",
+    category: "부동산",
+    format: "single",
+    theme: "rental",
+    coverStyle: "data-rank",
+    photoKey: "cafeStreet",
+    summary: "서울 월세 52% — 시장 숫자 (세법 이슈 배경 데이터)",
+    searchQueries: ["서울 월세 52%", "전세 월세화"],
+    buildSlides: () => [
+      {
+        layout: "top10",
+        headline: "월세화 빠른 동네\n서울 52% 돌파",
+        source: "Source · 국토부 8월 · 배경 데이터",
+        top10Items: [
+          { rank: 1, label: "마포·연남", note: "비아파트 월세화", value: "78%", highlight: true },
+          { rank: 2, label: "성동·성수", note: "갱신↑ 전세↓", value: "65%" },
+          { rank: 3, label: "용산", note: "재건축+전세절벽", value: "62%" },
+          { rank: 4, label: "강남", note: "전세가 고점", value: "35억+" },
+          { rank: 5, label: "송파", note: "반전세↑", value: "58%" },
+        ],
+        highlightRank: 1,
+        accent: "light",
+      },
+    ],
+    buildCaption: () =>
+      ["서울 월세 52% — 숫자 확인용.", "", "8월 메인은 세법·정책. 이건 배경 데이터."].join("\n"),
   },
   {
     id: "timely-trust-august",
     category: "시사",
     format: "single",
-    summary:
-      "8.2 머니투데이 — HUG 안심신탁 8월 윤곽. 전세금 공적관리·연 4~5%·PF 연계, 임대인·세입자 영향 한 장+",
-    searchQueries: ["안심신탁", "전세신탁 HUG", "8월 부동산"],
+    theme: "policy",
+    coverStyle: "scan-rank",
+    photoKey: "contract",
+    summary: "HUG 안심신탁 8월 — 전세금 공적관리·PF·세법과 겹치는 포인트",
+    searchQueries: ["안심신탁", "HUG 2026"],
     buildSlides: () => [
       {
-        layout: "photo-hook",
-        headline: "안심신탁\n8월 나온다",
-        subheadline: "전세금, 공적기구가 관리?",
-        coverImage: PHOTOS.contract,
-        logoImages: [BUILDER_LOGOS.hug],
-        bestComment: "4%? 전세금 넣으면 되는 거죠? …복잡하대요",
-        reactionLine: "조건 지옥각",
+        layout: "top10",
+        headline: "안심신탁\n8월 Q&A TOP10",
+        source: "Source · HUG 8월 윤곽",
+        top10Items: [
+          { rank: 1, label: "연 4~5%?", note: "조건·한도", value: "?", highlight: true },
+          { rank: 2, label: "전세금 안전", note: "공적 관리", value: "O" },
+          { rank: 3, label: "갭투자", note: "생산적 금융", value: "△" },
+          { rank: 4, label: "임대인 동의", note: "필수", value: "필수" },
+          { rank: 5, label: "세법 겹침", note: "실거주 세제", value: "?" },
+        ],
+        highlightRank: 1,
         accent: "dark",
       },
-      {
-        layout: "insight",
-        headline: "한 줄 요약",
-        body: [
-          "전세금 → HUG PF 보증 대출 → 연 4~5% 수익",
-          "갭투자 막고 '생산적 금융'으로",
-          "8월 중 윤곽 · 하반기 시행 논의",
-        ],
-        highlight: "전세·월세 시장 + 공급 둘 다 건드림",
-        accent: "green",
-      },
     ],
-    buildCaption: () =>
-      [
-        "안심신탁 8월 윤곽 나온다 — 전세 시장 판 바뀔 수 있어요.",
-        "",
-        "전세금 공적 관리 + PF 연계. 갭투자·고액 전세 규제랑 겹침.",
-        "👉 카드에서 핵심만 확인",
-      ].join("\n"),
-  },
-  {
-    id: "timely-live-in-tax",
-    category: "시사",
-    format: "carousel",
-    summary:
-      "8.3 실거주 중심 세제 — '집주인 들어오면 나가야죠' 전세·월세난 심화 우려 (머니투데이)",
-    searchQueries: ["실거주 세제", "종부세", "비거주 1주택"],
-    buildSlides: () => [
-      {
-        layout: "hook",
-        headline: "집주인\n들어온대요",
-        subheadline: "실거주 세제 · 8.3 이슈",
-        bestComment: "집주인: 그럼 나 들어갈게요 / 나: ???",
-        slideIndex: 1,
-        totalSlides: 3,
-      },
-      {
-        layout: "story",
-        headline: "왜 난리?",
-        body: [
-          "비거주 1주택 세↑ → 직접 입주 유인",
-          "보유세를 월세·전세에 전가 가능",
-          "20억 이하도 임대물량 감소 우려",
-        ],
-        slideIndex: 2,
-        totalSlides: 3,
-      },
-      {
-        layout: "insight",
-        headline: "세입자는",
-        highlight: "계약 만기 전 '갱신 vs 이사' 미리 시뮬레이션",
-        accent: "green",
-        slideIndex: 3,
-        totalSlides: 3,
-      },
-    ],
-    buildCaption: () =>
-      [
-        "실거주 세제 바뀌면 전세·월세 더 빡세질 수 있어요.",
-        "",
-        "8.3 머니투데이: 집주인 입주↑ → 전세 물량↓.",
-        "💬 '들어온다고? 무한이탈 각' — 공감되면 저장",
-      ].join("\n"),
+    buildCaption: () => ["안심신탁 8월 — 전세·공급·세금 세 축.", ""].join("\n"),
   },
 ];
 
-export function getTimelyTopicsForMonth(date: string): TopicBlueprint[] {
-  const m = new Date(date + "T12:00:00").getMonth() + 1;
-  if (m === 8) return TIMELY_AUG2026;
-  return TIMELY_AUG2026.slice(0, 1);
+export function getTimelyTopicsForMonth(_date: string): TopicBlueprint[] {
+  return TIMELY_CATALOG;
 }
+
+export function getTimelyForCategory(category: import("./cardTypes").Category, date: string): TopicBlueprint[] {
+  return getTimelyTopicsForMonth(date).filter((t) => t.category === category);
+}
+
+/** @deprecated use TIMELY_CATALOG */
+export const TIMELY_AUG2026 = TIMELY_CATALOG;

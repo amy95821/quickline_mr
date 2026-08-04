@@ -1,4 +1,5 @@
-import type { CardSlide, Category, CompareTopicId, ContentFormat } from "./cardTypes";
+import type { CardSlide, Category, CompareTopicId, ContentFormat, CoverStyle, TopicTheme } from "./cardTypes";
+import { PHOTOS, type PhotoKey } from "./cardImages";
 import { getComparePayload } from "./marketData";
 
 export interface TopicBlueprint {
@@ -9,6 +10,10 @@ export interface TopicBlueprint {
   searchQueries: string[];
   compareTopicId?: CompareTopicId;
   unsoldRegion?: string;
+  /** 이 토픽만의 비주얼 — enhancer가 일괄 덮어쓰지 않음 */
+  coverStyle?: CoverStyle;
+  theme?: TopicTheme;
+  photoKey?: PhotoKey;
   buildSlides: (date: string) => CardSlide[];
   buildCaption: (slides: CardSlide[]) => string;
 }
@@ -31,14 +36,17 @@ const DSR_STORY: TopicBlueprint = {
   id: "dsr-reform-winners",
   category: "부동산",
   format: "carousel",
+  theme: "story",
+  coverStyle: "story",
+  photoKey: "apartmentNight",
   summary:
     "DSR 3단계 강화 시 이기는 쪽(전세·월세 거주·무주택) vs 지는 쪽(갭투자·고레버리지)을 5장 스토리로 정리. 결론: 빚 내서 사기보다 버티기.",
   searchQueries: ["DSR 3단계 강화", "주택담보대출 규제", "갭투자 DSR"],
   buildSlides: () => [
     {
-      layout: "hook",
+      layout: "photo-hook",
       headline: "빚 내서\n집 샀다?",
-      subheadline: "DSR 3단계 · 솔직히 누가 망하나",
+      coverImage: PHOTOS.apartmentNight,
       accent: "dark",
       slideIndex: 1,
       totalSlides: 5,
@@ -115,26 +123,25 @@ const MY_HOME_REALITY: TopicBlueprint = {
   id: "my-home-oneroom-first",
   category: "부동산",
   format: "single",
+  theme: "rental",
+  coverStyle: "photo-split",
+  photoKey: "movingBoxes",
   summary:
     "「내 집 마련? 일단 원룸부터」— 2040 1인가구 40% 시대, '내 집'보다 거주비 고정·저축이 먼저인 이유를 한 장에 정리.",
   searchQueries: ["2040 1인가구", "원룸 전세", "내집마련 순서"],
   buildSlides: () => [
     {
-      layout: "insight",
+      layout: "photo-hook",
       headline: "내 집 마련?\n일단 원룸부터",
-      subheadline: "혼자 사는 사람 40%",
+      coverImage: PHOTOS.movingBoxes,
       body: [
-        "첫 목표는 '아파트 소유'가 아님",
-        "전세·월세로 거주비 고정 → 저축 → 그다음",
-        "무리한 첫 매수 = DSR·금리에 발목",
+        "2040 1인 가구 40% — 첫 목표는 '아파트 소유'가 아님",
+        "전세·월세로 거주비 고정 → 저축 → 그다음 매수",
+        "무리한 첫 매수 = DSR 3단계 + 금리에 발목",
+        "원룸·오피스텔 장기 거주 = 이사·보증금 스트레스↓",
+        "세법·청약 바뀌는 8월 — 현금흐름부터 튼튼히",
       ],
-      highlight: "내 집 = 첫 '거주 안정'이 먼저",
-      winnersLosers: [
-        { side: "winner", label: "전세·월세 안정 후 저축", reason: "통장부터 살림" },
-        { side: "loser", label: "무리한 첫 매수", reason: "DSR·금리 지옥" },
-        { side: "neutral", label: "원룸 장기 거주", reason: "이사 스트레스↓" },
-      ],
-      accent: "dark",
+      highlight: "내 집 = '소유'보다 '거주 안정'이 먼저",
     },
   ],
   buildCaption: () =>
@@ -149,7 +156,7 @@ const MY_HOME_REALITY: TopicBlueprint = {
     ].join("\n"),
 };
 
-function buildDataCompareTopic(id: CompareTopicId, date: string): TopicBlueprint {
+export function buildDataCompareTopic(id: CompareTopicId, date: string): TopicBlueprint {
   const data = getComparePayload(id);
   return {
     id: `compare-${id}`,
@@ -162,7 +169,6 @@ function buildDataCompareTopic(id: CompareTopicId, date: string): TopicBlueprint
       {
         layout: "chart",
         headline: data.headline,
-        subheadline: data.regionTag,
         priceSeries: data.priceSeries,
         supplySeries: data.supplySeries,
         priceLabel: data.priceLabel,
@@ -189,6 +195,9 @@ const JEONWOLSE_STORY: TopicBlueprint = {
   id: "jeonse-vs-wolse-story",
   category: "부동산",
   format: "carousel",
+  theme: "rental",
+  coverStyle: "story",
+  photoKey: "cafeStreet",
   summary:
     "전세 vs 월세, 2040에게 지금 어느 쪽이 유리한지 4장 스토리. DSR·전세가율·현금흐름 기준 결론 포함.",
   searchQueries: ["전세 월세 비교", "전세가율", "2040 전월세"],
@@ -255,7 +264,7 @@ const JEONWOLSE_STORY: TopicBlueprint = {
 
 /* ── 경제 ── */
 
-function buildEconomyCalendar(date: string): TopicBlueprint {
+export function buildEconomyCalendar(date: string): TopicBlueprint {
   const m = monthOf(date);
   const y = yearOf(date);
   return {
@@ -428,6 +437,9 @@ const HOUSING_POLICY: TopicBlueprint = {
   id: "housing-policy-meeting",
   category: "시사",
   format: "single",
+  theme: "policy",
+  coverStyle: "photo-split",
+  photoKey: "officeTower",
   summary:
     "국회 부동산 간담회·토론회 쟁점 3가지(공급·금융·세금)를 관련 인물+의견 수치로 한 장 요약.",
   searchQueries: ["국회 부동산 간담회", "주택 공급 정책", "부동산 세제"],
@@ -466,6 +478,9 @@ const DSR_POLICY_STORY: TopicBlueprint = {
   id: "policy-dsr-story",
   category: "시사",
   format: "carousel",
+  theme: "story",
+  coverStyle: "story",
+  photoKey: "officeTower",
   summary:
     "정부 DSR·주택정책 5장 스토리 — 무엇이 바뀌고, 2040 무주택·전세·매수 각각 어떻게 영향받는지.",
   searchQueries: ["DSR 규제", "주택정책 2026", "청년 주거"],
@@ -735,6 +750,9 @@ const TAX_REFORM: TopicBlueprint = {
   id: "tax-reform-policy",
   category: "시사",
   format: "single",
+  theme: "tax",
+  coverStyle: "photo-split",
+  photoKey: "contract",
   summary:
     "7월 정부 세제개편안 — 종부세·취득세·양도세, 2040 다주택·무주택 각각 영향 한 장 정리.",
   searchQueries: ["세제개편", "종부세", "취득세"],
@@ -770,6 +788,8 @@ const SEOUL_APT_RANKING: TopicBlueprint = {
   id: "seoul-apt-ranking",
   category: "아파트 브랜드",
   format: "single",
+  theme: "market",
+  coverStyle: "data-rank",
   summary:
     "서울 국민평형(32평) 실거래 TOP 7 — 강남·마포·송파 등 동네별 거래가 한 장 리스트.",
   searchQueries: ["서울 아파트 실거래", "32평"],
@@ -802,28 +822,29 @@ const BRAND_CHECKLIST: TopicBlueprint = {
   id: "brand-checklist",
   category: "아파트 브랜드",
   format: "single",
+  theme: "brand",
+  coverStyle: "data-rank",
   summary:
-    "아파트 브랜드 고를 때 2040 체크리스트 5가지 — 실거래·전세가율·입주물량·역세권·관리비.",
+    "아파트 브랜드 고를 때 체크리스트 5가지 — 실거래·전세가율·입주물량·역세권·관리비.",
   searchQueries: ["아파트 브랜드", "건설사"],
   buildSlides: () => [
     {
-      layout: "insight",
+      layout: "ranking",
       headline: "브랜드만\n믿지 마",
-      subheadline: "아파트 고를 때 5가지",
-      body: [
-        "① 실거래가·전세가율 (네이버·국토부)",
-        "② 입주물량·미분양 (공급 압력)",
-        "③ 역세권·학군 (프리미엄 근거)",
-        "④ 관리비·커뮤니티 (거주 만족)",
-        "⑤ 건설사 AS·하자 이력",
+      source: "아파트 고를 때 5가지",
+      rows: [
+        { rank: 1, label: "실거래·전세가율", sub: "네이버·국토부", value: "필수" },
+        { rank: 2, label: "입주물량·미분양", sub: "공급 압력", value: "확인" },
+        { rank: 3, label: "역세권·학군", sub: "프리미엄 근거", value: "입지" },
+        { rank: 4, label: "관리비·커뮤니티", sub: "거주 만족", value: "체크" },
+        { rank: 5, label: "건설사 AS·하자", sub: "하자 이력", value: "필수" },
       ],
       highlight: "브랜드 < 입지 + 실거래 + 현금흐름",
-      accent: "dark",
     },
   ],
   buildCaption: () =>
     [
-      "아파트 브랜드, 2040 체크리스트 5가지예요.",
+      "아파트 브랜드, 체크리스트 5가지예요.",
       "프리미엄만 보고 사면 손해 — 실거래·전세가율 먼저.",
     ].join("\n"),
 };

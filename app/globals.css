@@ -2,22 +2,30 @@
 
 @import "tailwindcss";
 
-/* 카드 전용 — 흔한 마케팅 폰트 대신 에디토리얼 조합 */
 @font-face {
-  font-family: "RIDIBatang";
+  font-family: "JalnanGothic";
   font-weight: 400;
   font-style: normal;
   font-display: swap;
-  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_twelve@1.0/RIDIBatang.woff")
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_231029@1.1/JalnanGothic.woff")
     format("woff");
 }
 
 @font-face {
-  font-family: "MaruBuri";
-  font-weight: 400;
+  font-family: "SUIT";
+  font-weight: 800;
   font-style: normal;
   font-display: swap;
-  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@2.1/MaruBuriRegular.woff")
+  src: url("https://cdn.jsdelivr.net/gh/sunn-us/SUIT/fonts/static/woff2/SUIT-ExtraBold.woff2")
+    format("woff2");
+}
+
+@font-face {
+  font-family: "GmarketSans";
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2001@1.1/GmarketSansBold.woff")
     format("woff");
 }
 
@@ -30,9 +38,20 @@
     format("woff");
 }
 
+@font-face {
+  font-family: "MaruBuri";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+  src: url("https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_20-04@2.1/MaruBuriRegular.woff")
+    format("woff");
+}
+
 :root {
   --font-pretendard: "Pretendard", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
-  --font-display: "RIDIBatang", "Georgia", "Times New Roman", serif;
+  --font-punch: "JalnanGothic", "GmarketSans", sans-serif;
+  --font-data: "SUIT", "GmarketSans", sans-serif;
+  --font-head: "GmarketSans", var(--font-pretendard);
   --font-body: "MaruBuri", var(--font-pretendard);
   --background: #f5f2ec;
   --foreground: #1a1a1a;
@@ -42,14 +61,4 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-pretendard);
-}
-
-.font-card-display {
-  font-family: var(--font-display);
-  font-weight: 400;
-}
-
-.font-card-body {
-  font-family: var(--font-body);
-  font-weight: 400;
 }

@@ -186,7 +186,7 @@ export default function Home() {
 
           <section>
             <div className="mb-3 flex items-center justify-between">
-              <Field label="오늘의 주제 · 4+TOP10" />
+            <Field label={`오늘의 주제 · ${topics.length}개`} />
               <button
                 type="button"
                 onClick={() => void loadTopics()}
@@ -196,43 +196,78 @@ export default function Home() {
                 <RefreshCw className={`h-3.5 w-3.5 ${loadingTopics ? "animate-spin" : ""}`} />
               </button>
             </div>
-            <p className="mb-4 text-xs leading-relaxed text-black/45">
-              매일 다른 4개 + TOP10 1개 · 1~2개는 실사 커버 · 시의성 이슈 반영
+            <p className="mb-3 text-xs leading-relaxed text-black/45">
+              매일 <strong className="text-black/70">4종류 섞임</strong> — 실사 후킹 · 스토리 · 데이터 · 클리핑 + 5번 TOP10
             </p>
             <ul className="space-y-3">
-              {topics.map((t) => (
-                <li key={t.id}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelected(t);
-                      setContent(null);
-                      setSlideIndex(0);
-                    }}
-                    className={`w-full py-2 text-left transition ${
-                      selected?.id === t.id ? "opacity-100" : "opacity-55 hover:opacity-80"
-                    }`}
-                  >
-                    <span className="flex flex-wrap items-center gap-1.5 text-[10px] tracking-wide text-black/40">
-                      {t.isTop10 ? (
-                        <span className="bg-[#C0392B] px-1.5 py-0.5 text-white">TOP10</span>
-                      ) : (
+              {topics
+                .filter((t) => !t.isTop10)
+                .map((t, i) => (
+                  <li key={t.id}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelected(t);
+                        setContent(null);
+                        setSlideIndex(0);
+                      }}
+                      className={`w-full rounded-lg border px-3 py-2.5 text-left transition ${
+                        selected?.id === t.id
+                          ? "border-black/25 bg-white opacity-100 shadow-sm"
+                          : "border-transparent opacity-60 hover:opacity-85"
+                      }`}
+                    >
+                      <span className="flex flex-wrap items-center gap-1.5 text-[10px] tracking-wide text-black/40">
+                        <span className="font-bold text-black/55">{i + 1}.</span>
+                        {t.slotLabel && (
+                          <span className="rounded bg-black/8 px-1.5 py-0.5 font-bold text-black/55">{t.slotLabel}</span>
+                        )}
                         <span>{FORMAT_LABELS[t.format]}</span>
-                      )}
-                      {t.hasPhotoCover && (
-                        <span className="border border-black/20 px-1 py-0.5">실사 커버</span>
-                      )}
-                      {t.timelinessTag && (
-                        <span className="text-[#C0392B]">{t.timelinessTag}</span>
-                      )}
-                    </span>
-                    <p className="mt-1 text-[12px] font-medium leading-relaxed text-black/80">
-                      {t.summary}
-                    </p>
-                  </button>
-                </li>
-              ))}
+                        {t.timelinessTag && (
+                          <span className="font-bold text-[#C0392B]">{t.timelinessTag}</span>
+                        )}
+                      </span>
+                      <p className="mt-1 text-[12px] font-medium leading-relaxed text-black/80">
+                        {t.summary}
+                      </p>
+                    </button>
+                  </li>
+                ))}
             </ul>
+
+            {topics.some((t) => t.isTop10) && (
+              <div className="mt-5 border-t-2 border-[#C0392B] pt-4">
+                <p className="mb-2 text-[10px] font-bold tracking-widest text-[#C0392B]">
+                  ⭐ 5번 · 오늘의 TOP10
+                </p>
+                {topics
+                  .filter((t) => t.isTop10)
+                  .map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => {
+                        setSelected(t);
+                        setContent(null);
+                        setSlideIndex(0);
+                      }}
+                      className={`w-full rounded-lg border-2 px-3 py-3 text-left transition ${
+                        selected?.id === t.id
+                          ? "border-[#C0392B] bg-[#FFF5F5] opacity-100"
+                          : "border-[#C0392B]/30 opacity-75 hover:opacity-100"
+                      }`}
+                    >
+                      <span className="flex flex-wrap items-center gap-1.5 text-[10px]">
+                        <span className="bg-black px-2 py-0.5 font-bold text-[#CDFF00]">TOP10</span>
+                      </span>
+                      <p className="mt-2 text-[12px] font-bold leading-relaxed text-black/85">
+                        {t.summary}
+                      </p>
+                    </button>
+                  ))}
+              </div>
+            )}
+
             <button
               type="button"
               disabled={!selected || generating}
@@ -259,6 +294,7 @@ export default function Home() {
             <label className="mt-4 flex cursor-pointer flex-col items-center border border-dashed border-black/15 py-6 text-center">
               <Upload className="mb-2 h-4 w-4 text-black/30" />
               <span className="text-xs text-black/45">정부 미분양 엑셀 (.xlsx) 업로드</span>
+              <span className="mt-1 text-[10px] text-black/30">API 연동 가능 — 공공데이터포털 키 설정 시 자동 조회 (미구현)</span>
               {excelName && (
                 <span className="mt-1 text-[10px] text-black/35">{excelName}</span>
               )}
@@ -291,7 +327,7 @@ export default function Home() {
               {currentSlide ? (
                 <InstaCardPreview slide={currentSlide} />
               ) : (
-                <div className="flex aspect-square items-center justify-center bg-[#F5F0E8] px-8 text-center text-sm leading-relaxed text-black/30">
+                <div className="flex aspect-square items-center justify-center bg-[#F5F5F5] px-8 text-center text-sm leading-relaxed text-black/30">
                   주제를 선택해 카드를 생성하세요
                 </div>
               )}

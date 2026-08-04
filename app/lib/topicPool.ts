@@ -1,22 +1,57 @@
-import type { Category } from "./cardTypes";
-import {
-  ALL_TOPICS,
-  buildDataCompareTopic,
-  buildEconomyCalendar,
-  resolveBlueprint,
-  type TopicBlueprint,
-} from "./contentLibrary";
-import { pickHumor } from "./humorSnippets";
-import { pickPhoto, PHOTOS, BUILDER_LOGOS } from "./cardImages";
+import type { Category, CoverStyle, TopicTheme } from "./cardTypes";
+import { ALL_TOPICS, buildEconomyCalendar, type TopicBlueprint } from "./contentLibrary";
 import { buildTop10Blueprint } from "./top10Library";
-import { getTimelyTopicsForMonth } from "./timelyTopics";
+import { TIMELY_CATALOG, getTimelyForCategory } from "./timelyTopics";
+import { coverStyleFromBlueprint } from "./slideEnhancer";
 
 export interface TopicPickMeta {
   blueprint: TopicBlueprint;
-  hasPhotoCover: boolean;
+  coverStyle: CoverStyle;
   isTop10: boolean;
+  slotLabel?: string;
   timelinessTag?: string;
 }
+
+/** 매일 4슬롯 — 타입 섞기: 실사 / 스토리 / 데이터 / 클리핑 */
+interface DailySlot {
+  label: string;
+  themes: TopicTheme[];
+  coverStyle: CoverStyle;
+  format?: "single" | "carousel";
+}
+
+const SLOTS_BY_CATEGORY: Record<Category, DailySlot[]> = {
+  부동산: [
+    { label: "실사 후킹", themes: ["tax", "policy"], coverStyle: "full-photo", format: "single" },
+    { label: "스토리", themes: ["story", "rental"], coverStyle: "story", format: "carousel" },
+    { label: "데이터", themes: ["market", "brand"], coverStyle: "data-rank", format: "single" },
+    { label: "클리핑", themes: ["tax", "calendar", "supply"], coverStyle: "photo-split", format: "single" },
+  ],
+  경제: [
+    { label: "실사", themes: ["rate", "policy"], coverStyle: "full-photo" },
+    { label: "스토리", themes: ["story", "rate"], coverStyle: "story", format: "carousel" },
+    { label: "데이터", themes: ["market"], coverStyle: "chart-card" },
+    { label: "클리핑", themes: ["policy"], coverStyle: "photo-split" },
+  ],
+  시사: [
+    { label: "실사", themes: ["policy", "tax"], coverStyle: "full-photo" },
+    { label: "스토리", themes: ["story"], coverStyle: "story", format: "carousel" },
+    { label: "데이터", themes: ["policy"], coverStyle: "scan-rank" },
+    { label: "클리핑", themes: ["tax"], coverStyle: "photo-split" },
+  ],
+  "아파트 브랜드": [
+    { label: "실사", themes: ["brand", "market"], coverStyle: "full-photo" },
+    { label: "스토리", themes: ["brand"], coverStyle: "story", format: "carousel" },
+    { label: "데이터", themes: ["market"], coverStyle: "data-rank" },
+    { label: "클리핑", themes: ["brand"], coverStyle: "photo-split" },
+  ],
+  "미분양·공급": [
+    { label: "실사", themes: ["supply"], coverStyle: "full-photo" },
+    { label: "스토리", themes: ["supply"], coverStyle: "story" },
+    { label: "데이터", themes: ["supply", "market"], coverStyle: "scan-rank" },
+    { label: "클리핑", themes: ["supply"], coverStyle: "photo-split" },
+  ],
+};
 
 function hash(s: string): number {
   let h = 0;
@@ -24,137 +59,100 @@ function hash(s: string): number {
   return Math.abs(h);
 }
 
-function isCompareDay(date: string): boolean {
-  const d = new Date(date + "T12:00:00");
-  const wd = d.getDay() === 0 ? 7 : d.getDay();
-  const seed = hash(date.slice(0, 7));
-  return wd === (seed % 5) + 1 || wd === ((seed >> 3) % 5) + 1;
-}
-
-function pickCompareId(date: string) {
-  const ids = [
-    "seoul-supply-cliff",
-    "gangnam-vs-mapo",
-    "mapo-yongsan-seongdong",
-    "jeonse-vs-maemae",
-    "redevelop-vs-new",
-    "gyeonggi-vs-seoul-outer",
-    "changwon-supply",
-  ] as const;
-  return ids[hash(date) % ids.length];
-}
-
-/** 카테고리별 확장 풀 — 고정 4개 반복 방지 */
 function basePool(category: Category, date: string): TopicBlueprint[] {
-  const timely = getTimelyTopicsForMonth(date).filter((t) => t.category === category);
-  const staticForCat = ALL_TOPICS.filter((t) => t.category === category && !t.unsoldRegion);
+  const timely = getTimelyForCategory(category, date);
+  const staticForCat = ALL_TOPICS.filter(
+    (t) => t.category === category && !t.unsoldRegion && !t.id.startsWith("compare-"),
+  );
 
-  if (category === "부동산") {
-    const compare = buildDataCompareTopic(
-      isCompareDay(date) ? pickCompareId(date) : "seoul-supply-cliff",
-      date,
-    );
-    return [...timely, ...staticForCat, compare];
-  }
   if (category === "경제") {
     return [...timely, buildEconomyCalendar(date), ...staticForCat];
   }
   if (category === "미분양·공급") {
-    return [
-      ...timely,
-      ...ALL_TOPICS.filter((t) => t.unsoldRegion),
-      buildDataCompareTopic("gyeonggi-vs-seoul-outer", date),
-      buildDataCompareTopic("changwon-supply", date),
-    ];
+    return [...ALL_TOPICS.filter((t) => t.unsoldRegion && t.category === category), ...timely];
   }
   return [...timely, ...staticForCat];
 }
 
-function shufflePick<T>(items: T[], count: number, seed: string): T[] {
-  const arr = [...items];
-  let s = hash(seed);
-  for (let i = arr.length - 1; i > 0; i--) {
-    s = (s * 1103515245 + 12345) | 0;
-    const j = Math.abs(s) % (i + 1);
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-  }
-  const seen = new Set<string>();
-  const out: T[] = [];
-  for (const item of arr) {
-    const id = (item as TopicBlueprint).id;
-    if (seen.has(id)) continue;
-    seen.add(id);
-    out.push(item);
-    if (out.length >= count) break;
-  }
-  return out;
+function matchesSlot(bp: TopicBlueprint, slot: DailySlot): boolean {
+  const theme = bp.theme ?? inferTheme(bp);
+  if (!slot.themes.includes(theme)) return false;
+  if (slot.format && bp.format !== slot.format) return false;
+  return true;
 }
 
-/** 첫 슬라이드를 실사 커버로 보강 */
-function withPhotoCover(bp: TopicBlueprint, date: string): TopicBlueprint {
-  const orig = bp.buildSlides;
-  const seed = hash(date + bp.id);
-  const humor = pickHumor(
-    bp.id.includes("brand") ? "brand" : bp.id.includes("dsr") ? "dsr" : "jeonse",
-    seed,
-  );
-  const photo = pickPhoto(seed);
-  const logos =
-    bp.category === "아파트 브랜드"
-      ? [BUILDER_LOGOS.samsung, BUILDER_LOGOS.hyundai]
-      : undefined;
+function inferTheme(bp: TopicBlueprint): TopicTheme {
+  const s = `${bp.id} ${bp.summary}`;
+  if (/세법|세제|종부|양도|취득|tax/i.test(s)) return "tax";
+  if (/DSR|정책|국회|policy/i.test(s)) return "policy";
+  if (/TOP|순위|실거래|ranking|10억/i.test(s)) return "market";
+  if (/전세|월세|원룸|rental|jeonse|wolse/i.test(s)) return "rental";
+  if (/브랜드|건설|brand/i.test(s)) return "brand";
+  if (/미분양|공급|supply|unsold/i.test(s)) return "supply";
+  if (/청약|calendar|달력/i.test(s)) return "calendar";
+  if (/금리|rate|FOMC/i.test(s)) return "rate";
+  return "story";
+}
 
-  return {
-    ...bp,
-    buildSlides: (dateStr) => {
-      const slides = orig(dateStr);
-      if (!slides.length || slides[0].layout === "photo-hook") return slides;
-      const first = slides[0];
-      if (first.layout === "hook") {
-        slides[0] = {
-          ...first,
-          layout: "photo-hook",
-          coverImage: photo,
-          logoImages: logos,
-          bestComment: humor.bestComment,
-          reactionLine: humor.reactionLine,
-        };
-      }
-      return slides;
-    },
-  };
+function pickForSlot(
+  pool: TopicBlueprint[],
+  slot: DailySlot,
+  used: Set<string>,
+  date: string,
+  category: Category,
+  slotIndex: number,
+): TopicBlueprint | null {
+  const candidates = pool.filter((bp) => !used.has(bp.id) && matchesSlot(bp, slot));
+  if (candidates.length) {
+    const idx = hash(`${date}-${category}-slot${slotIndex}`) % candidates.length;
+    return candidates[idx];
+  }
+  const fallback = pool.filter((bp) => !used.has(bp.id));
+  if (!fallback.length) return null;
+  const idx = hash(`${date}-${category}-fb${slotIndex}`) % fallback.length;
+  return fallback[idx];
 }
 
 export function getDailyTopicPicks(category: Category, date: string): TopicPickMeta[] {
   const pool = basePool(category, date);
-  const picked = shufflePick(pool, 4, `${date}-${category}-daily`);
+  const slots = SLOTS_BY_CATEGORY[category];
+  const used = new Set<string>();
+  const daily: TopicPickMeta[] = [];
 
-  const photoIndices = new Set<number>();
-  const h = hash(`${date}-${category}-photo`);
-  photoIndices.add(h % 4);
-  photoIndices.add((h >> 2) % 4);
-  if (photoIndices.size < 2) photoIndices.add((h >> 4) % 4);
-
-  const daily: TopicPickMeta[] = picked.map((bp, i) => {
-    const timely = bp.summary.includes("8.") || bp.id.startsWith("timely");
-    const usePhoto = photoIndices.has(i);
-    return {
-      blueprint: usePhoto ? withPhotoCover(bp, date + i) : bp,
-      hasPhotoCover: usePhoto || bp.buildSlides(date)[0]?.layout === "photo-hook",
+  slots.forEach((slot, i) => {
+    const bp = pickForSlot(pool, slot, used, date, category, i);
+    if (!bp) return;
+    used.add(bp.id);
+    daily.push({
+      blueprint: bp,
+      coverStyle: bp.coverStyle ?? slot.coverStyle,
       isTop10: false,
-      timelinessTag: timely ? "이번 주 이슈" : undefined,
-    };
+      slotLabel: slot.label,
+      timelinessTag: bp.id.startsWith("timely-") ? slot.label : undefined,
+    });
   });
 
-  const top10 = buildTop10Blueprint(category, date);
+  while (daily.length < 4) {
+    const rest = pool.filter((t) => !used.has(t.id));
+    if (!rest.length) break;
+    const bp = rest[0];
+    used.add(bp.id);
+    daily.push({
+      blueprint: bp,
+      coverStyle: coverStyleFromBlueprint(bp),
+      isTop10: false,
+    });
+  }
+
   daily.push({
-    blueprint: top10,
-    hasPhotoCover: true,
+    blueprint: buildTop10Blueprint(category, date),
+    coverStyle: "scan-rank",
     isTop10: true,
-    timelinessTag: top10.summary.includes("8.") ? "오늘의 TOP10" : "TOP10",
+    slotLabel: "TOP10",
+    timelinessTag: "TOP10",
   });
 
   return daily;
 }
 
-export { resolveBlueprint };
+export { TIMELY_CATALOG };

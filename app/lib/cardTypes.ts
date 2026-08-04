@@ -7,6 +7,27 @@ export type Category =
 
 export type ContentFormat = "single" | "carousel";
 
+/** 카드 비주얼 타입 — 일괄 변환 금지, 토픽마다 고정 */
+export type CoverStyle =
+  | "full-photo"   // 실사 풀블리드 후킹
+  | "photo-split"  // 실사 + 하단 본문 패널
+  | "data-rank"    // apt_lap 흑백 순위
+  | "scan-rank"    // scan.real.data 라임 헤더
+  | "chart-card"   // 차트·데이터
+  | "story"        // 텍스트 스토리 (캐러셀 2~5장)
+  | "none";
+
+export type TopicTheme =
+  | "tax"
+  | "policy"
+  | "market"
+  | "rental"
+  | "story"
+  | "brand"
+  | "supply"
+  | "calendar"
+  | "rate";
+
 export type SlideLayout =
   | "hook"
   | "photo-hook"
@@ -83,7 +104,9 @@ export interface CardSlide {
   bestComment?: string;
   /** 무한도전식 리액션 한줄 */
   reactionLine?: string;
-  top10Items?: { rank: number; label: string; note: string }[];
+  top10Items?: { rank: number; label: string; note: string; value?: string; highlight?: boolean; logoUrl?: string }[];
+  /** TOP10 하이라이트 행 (scan.real.data 스타일) */
+  highlightRank?: number;
 }
 
 export interface GeneratedContent {
@@ -133,7 +156,7 @@ export const FORMAT_LABELS: Record<ContentFormat, string> = {
 
 export const LAYOUT_LABELS: Record<SlideLayout, string> = {
   hook: "후킹",
-  "photo-hook": "실사 커버",
+  "photo-hook": "커버",
   story: "전개",
   insight: "인사이트",
   calendar: "달력",
