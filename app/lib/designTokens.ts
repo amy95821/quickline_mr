@@ -1,31 +1,60 @@
-/** apt_lap · scan.real.data · 인스타 실사 커버 — 레이아웃별 팔레트 */
+/** SNS 카드뉴스 — 디자인 시스템 (3차 개정: 무결점 레이아웃) */
 export const C = {
   black: "#0A0A0A",
   navy: "#1A2744",
   cream: "#F7F4EF",
-  sand: "#EDE8DF",
   white: "#FFFFFF",
-  lime: "#CDFF00",
+  lime: "#CCFF00",
   coral: "#FF4757",
   ink: "#111111",
-  muted: "#666666",
-  grayLine: "#DDDDDD",
+  muted: "#888888",
+  cardBg: "#0A0A0A",
+  rowBg: "#1A1A1A",
 } as const;
 
-/** 카드 하단 @handle · 본문 여백 */
-export const CARD_SAFE = { x: 28, top: 20, bottom: 64 } as const;
-export const BRAND_ZONE = 22;
+/** 하드룰: padding은 2.5rem(40px) 고정. 로고는 별도 footer row라 절대 겹치지 않음 */
+export const CARD_SAFE = { x: 40, top: 40, bottom: 40 } as const;
+export const FOOTER_H = 44;
 
-/** 실사 풀커버·후킹 — Cafe24 써라운드 (SNS 카드뉴스) */
-export const FONT_PUNCH = '"Cafe24Ssurround", "JalnanGothic", sans-serif';
+export const LAYOUT = {
+  pad: 40,
+  gapSm: 10,
+  gapMd: 16,
+  gapLg: 24,
+  bodyLh: 1.65,
+} as const;
 
-/** apt_lap 순위·숫자 — Tmon Monsori */
-export const FONT_DATA = '"TmonMonsori", "SUIT", sans-serif';
+export const FONT_PUNCH = "var(--font-title)";
+export const FONT_HEAD = "var(--font-title)";
+export const FONT_BODY = "var(--font-body)";
+export const FONT_DATA = "var(--font-data)";
+export const INSET_X = "px-10";
 
-/** 스토리 헤드 — Paperlogy */
-export const FONT_HEAD = '"Paperlogy", "GmarketSans", sans-serif';
+export function cardPad() {
+  return {
+    paddingTop: CARD_SAFE.top,
+    paddingLeft: CARD_SAFE.x,
+    paddingRight: CARD_SAFE.x,
+  };
+}
 
-/** 본문 — BookkMyungjo (명조 — 흔한 고딕과 차별) */
-export const FONT_BODY = '"BookkMyungjo", "MaruBuri", serif';
+/** 디자인 있는 딤 — 단순 검정 뭉개기 대신 그라디언트 + 콘트라스트 구간 */
+export const DIM_GRADIENT =
+  "linear-gradient(185deg, rgba(10,14,24,0.55) 0%, rgba(10,14,24,0.72) 40%, rgba(6,8,14,0.94) 100%)";
+export const DIM_GRADIENT_HEAVY =
+  "linear-gradient(185deg, rgba(10,14,24,0.7) 0%, rgba(8,10,18,0.85) 45%, rgba(4,5,10,0.97) 100%)";
 
-export const INSET_X = "px-7";
+/** "AI 냄새" 제거 — Action Item → 인플루언서 톤 라벨 로테이션 */
+export const KEY_POINT_LABELS = ["✅ 당장 실행할 것", "💡 오늘의 전략", "📍 핵심 체크리스트"] as const;
+
+export function pickKeyPointLabel(seed: string): string {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (h * 31 + seed.charCodeAt(i)) | 0;
+  return KEY_POINT_LABELS[Math.abs(h) % KEY_POINT_LABELS.length];
+}
+
+/** 본문 150자 하드 캡 — 컨테이너 이탈 방지 안전망 */
+export function clampText(text: string, max = 150): string {
+  if (text.length <= max) return text;
+  return text.slice(0, max - 1).trimEnd() + "…";
+}

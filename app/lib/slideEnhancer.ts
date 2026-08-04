@@ -2,7 +2,7 @@ import type { CardSlide, CoverStyle } from "./cardTypes";
 
 import type { TopicBlueprint } from "./contentLibrary";
 
-import { PHOTOS, pickPhoto, type PhotoKey } from "./cardImages";
+import { PHOTOS, pickPhotoForTopic, type PhotoKey } from "./cardImages";
 
 
 
@@ -35,25 +35,24 @@ function hash(s: string): number {
 
 
 function photoFor(opts: EnhanceOptions, slideIndex = 0): string {
+  const theme = inferPhotoTheme(opts.blueprintId);
+  return pickPhotoForTopic(`${opts.date}-${opts.blueprintId}`, theme, opts.photoKey, slideIndex);
+}
 
-  if (opts.photoKey) {
-
-    const keys = Object.keys(PHOTOS) as PhotoKey[];
-
-    const base = keys.indexOf(opts.photoKey);
-
-    const idx = base >= 0 ? (base + slideIndex) % keys.length : hash(opts.blueprintId) % keys.length;
-
-    return PHOTOS[keys[idx]];
-
-  }
-
-  return pickPhoto(hash(`${opts.date}-${opts.blueprintId}-${slideIndex}`)) ?? PHOTOS.apartmentNight;
+function inferPhotoTheme(blueprintId: string): string {
+  if (/tax|세법|종부|양도|취득|live-in/.test(blueprintId)) return "tax";
+  if (/dsr|policy|assembly|국회/.test(blueprintId)) return "policy";
+  if (/rank|apt|brand|실거래/.test(blueprintId)) return "market";
+  if (/jeon|wolse|rental|월세|전세/.test(blueprintId)) return "rental";
+  if (/unsold|supply|미분양|cheongyak|청약/.test(blueprintId)) return "supply";
+  if (/rate|금리|economy|calendar/.test(blueprintId)) return "rate";
+  if (/story|dsr-reform/.test(blueprintId)) return "story";
+  return "default";
 }
 
 function clampPhotoSplitBody(body: string[] | undefined, highlight?: string): string[] | undefined {
   if (!body?.length) return body;
-  const max = highlight ? 3 : 4;
+  const max = highlight ? 2 : 3;
   return body.slice(0, max);
 }
 
@@ -210,13 +209,12 @@ function enhanceOne(
 
 
     case "scan-rank":
-
-      if (index === 0) {
-
+      if (index === 0 && slide.layout !== "top10") {
         return { ...slide, coverImage: slide.coverImage ?? photo, accent: slide.accent ?? "dark" };
-
       }
-
+      if (index === 0 && slide.layout === "top10") {
+        return { ...slide, coverImage: undefined, accent: "dark" };
+      }
       return slide;
 
 

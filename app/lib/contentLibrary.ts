@@ -45,7 +45,7 @@ const DSR_STORY: TopicBlueprint = {
   buildSlides: () => [
     {
       layout: "photo-hook",
-      headline: "빚 내서\n집 샀다?",
+      headline: "DSR 3단계 시행\n내 대출 한도부터 줄어든다",
       coverImage: PHOTOS.apartmentNight,
       accent: "dark",
       slideIndex: 1,
@@ -484,7 +484,7 @@ const DSR_POLICY_STORY: TopicBlueprint = {
   buildSlides: () => [
     {
       layout: "hook",
-      headline: "정부 DSR\n또 바뀐다",
+      headline: "세제 완화 뉴스\n내 월급통장은 왜 그대로인가",
       subheadline: "나한테 뭐가 달라지나",
       accent: "dark",
       slideIndex: 1,

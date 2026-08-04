@@ -1,6 +1,6 @@
 import type { CardSlide, Category } from "./cardTypes";
 import type { TopicBlueprint } from "./contentLibrary";
-import { BUILDER_LOGOS, PHOTOS, type PhotoKey } from "./cardImages";
+import { BUILDER_LOGOS, type PhotoKey } from "./cardImages";
 
 export interface Top10Entry {
   id: string;
@@ -233,7 +233,6 @@ function buildTop10FromEntry(entry: Top10Entry, category: Category): TopicBluepr
           logoUrl: item.logoKey ? BUILDER_LOGOS[item.logoKey] : undefined,
         })),
         highlightRank: highlight,
-        coverImage: entry.photoKey ? PHOTOS[entry.photoKey] : undefined,
         accent: "dark",
       },
     ],
@@ -243,7 +242,7 @@ function buildTop10FromEntry(entry: Top10Entry, category: Category): TopicBluepr
         "",
         entry.summary,
         "",
-        ...entry.items.slice(0, 3).map((i) => `${i.rank}. ${i.label} — ${i.value}`),
+        ...entry.items.map((i) => `${i.rank}. ${i.label} — ${i.value}${i.note ? ` (${i.note})` : ""}`),
         "",
         entry.timely ? `출처: ${entry.timely.replace(/^Source · /, "")}` : "",
         "",

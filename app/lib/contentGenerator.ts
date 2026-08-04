@@ -2,6 +2,7 @@ import type { CardSlide, GeneratedContent } from "./cardTypes";
 import { buildBrightCaption } from "./captionTone";
 import { buildHashtags } from "./hashtags";
 import { enhanceSlides, enhanceSingleSlide, stripSourcesFromSlides, appendSourcesToCaption } from "./slideEnhancer";
+import { injectViralSlides, injectViralCaption } from "./viralEngine";
 import { findBlueprint, type SuggestedTopic } from "./topicSuggester";
 import { analyzeUnsold, MOCK_UNSOLD_ROWS } from "./unsoldParser";
 
@@ -63,6 +64,13 @@ export function generateFromTopic(
     isTop10: topic.isTop10 ?? topic.blueprintId.startsWith("top10-"),
   });
 
+  slides = injectViralSlides(slides, {
+    blueprintId: topic.blueprintId,
+    category: topic.category,
+    format: bp.format,
+    date,
+  });
+
   const { slides: cleaned, sources } = stripSourcesFromSlides(slides);
   slides = cleaned;
 
@@ -73,6 +81,12 @@ export function generateFromTopic(
       : bp.buildCaption(slides);
 
   let bodyCaption = buildBrightCaption(topic.blueprintId, fallbackCaption, slides);
+  bodyCaption = injectViralCaption(bodyCaption, {
+    blueprintId: topic.blueprintId,
+    category: topic.category,
+    format: bp.format,
+    date,
+  });
   bodyCaption = appendSourcesToCaption(bodyCaption, sources);
   const caption = `${bodyCaption}\n\n${hashtags.join(" ")}`;
 
