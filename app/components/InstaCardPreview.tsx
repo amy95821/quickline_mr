@@ -9,12 +9,18 @@ import {
   CARD_SAFE,
   DIM_GRADIENT,
   DIM_GRADIENT_HEAVY,
+  SOFT_GRADIENT,
   INSET_X,
   LAYOUT,
   cardPad,
   pickKeyPointLabel,
   clampText,
+  resolveTone,
+  fitBodyClass,
+  CHARACTER_BADGE,
 } from "../lib/designTokens";
+
+type Tone = "dark" | "soft";
 
 interface InstaCardPreviewProps {
   slide: CardSlide;
@@ -82,39 +88,84 @@ function SafeImage({
   );
 }
 
-/** 실사 + 디자인된 딤(그라디언트) + 코너 라인 악센트 — 기본 배경 템플릿 */
-function DimPhotoBg({ src, heavy }: { src: string; heavy?: boolean }) {
+/** 실사 + 디자인된 딤(그라디언트) + 코너 라인 악센트 — 톤별(다크 네온 / 파스텔 소프트) */
+function DimPhotoBg({ src, tone = "dark", heavy }: { src: string; tone?: Tone; heavy?: boolean }) {
+  const bg = tone === "soft" ? SOFT_GRADIENT : heavy ? DIM_GRADIENT_HEAVY : DIM_GRADIENT;
+  const accent = tone === "soft" ? "border-white/80" : "border-[#CCFF00]/70";
+  const accent2 = tone === "soft" ? "border-white/45" : "border-[#CCFF00]/40";
   return (
     <div className="absolute inset-0">
       <SafeImage src={src} className="absolute inset-0 h-full w-full object-cover" />
-      <div
-        className="absolute inset-0"
-        style={{ background: heavy ? DIM_GRADIENT_HEAVY : DIM_GRADIENT }}
-      />
+      <div className="absolute inset-0" style={{ background: bg }} />
       {/* 미니멀 라인 악센트 — 텅 빈 느낌 방지 */}
-      <div className="absolute left-9 top-9 h-8 w-8 border-l-2 border-t-2 border-[#CCFF00]/70" />
-      <div className="absolute bottom-14 right-9 h-8 w-8 border-b-2 border-r-2 border-[#CCFF00]/40" />
+      <div className={"absolute left-9 top-9 h-8 w-8 border-l-2 border-t-2 " + accent} />
+      <div className={"absolute bottom-14 right-9 h-8 w-8 border-b-2 border-r-2 " + accent2} />
     </div>
   );
 }
 
-/** 형광 pill 대신 — 인플루언서 톤 라벨 + 유리(Glass) 패널 */
-function KeyPointPanel({ text, seed }: { text: string; seed: string }) {
+/** 체크리스트 박스 대신 — 형광펜(marker) 하이라이트로 강조 (볼드 + 컬러) */
+function HighlightLine({ text, seed, tone = "dark" }: { text: string; seed: string; tone?: Tone }) {
   const label = pickKeyPointLabel(seed);
+  const isSoft = tone === "soft";
   return (
-    <div className="mt-6 shrink-0 rounded-xl border border-white/15 bg-white/10 px-5 py-4 backdrop-blur-md">
-      <p className="mb-1.5 text-[11px] font-bold tracking-wide text-[#CCFF00]">{label}</p>
-      <p className="font-body text-[15px] font-semibold leading-relaxed text-white">
+    <p
+      className={
+        "mt-6 shrink-0 font-body text-[15px] font-bold leading-relaxed " +
+        (isSoft ? "text-[#1E2A47]" : "text-white")
+      }
+    >
+      <span className={isSoft ? "text-[#4C6FE0]" : "text-[#CCFF00]"}>{label} </span>
+      <mark
+        className={
+          "rounded-[3px] px-1 py-0.5 box-decoration-clone " +
+          (isSoft ? "bg-[#FFE066]/70 text-[#1E2A47]" : "bg-[#CCFF00]/25 text-white")
+        }
+      >
         {clampText(text, 150)}
-      </p>
+      </mark>
+    </p>
+  );
+}
+
+/** 캐릭터 호스트 코멘트 — 항상 일반 flex 흐름에 배치해 겹침 원천 차단 */
+function CharacterBubble({ text, tone = "soft" }: { text: string; tone?: Tone }) {
+  return (
+    <div className="mt-5 flex shrink-0 items-end gap-2.5">
+      <img
+        src={CHARACTER_BADGE}
+        alt=""
+        className="h-10 w-10 shrink-0 rounded-full object-cover shadow-md ring-2 ring-white/70"
+      />
+      <div
+        className={
+          "min-w-0 max-w-[80%] rounded-2xl rounded-bl-sm px-3.5 py-2.5 text-[12.5px] font-bold leading-snug shadow-sm " +
+          (tone === "soft" ? "bg-white/92 text-[#2B3A55]" : "bg-white/95 text-[#1A2744]")
+        }
+      >
+        {text}
+      </div>
     </div>
   );
 }
 
-function HeadlineBlock({ headline, accentClass = "text-[#CCFF00]" }: { headline: string; accentClass?: string }) {
+function HeadlineBlock({
+  headline,
+  accentClass = "text-[#CCFF00]",
+  light = false,
+}: {
+  headline: string;
+  accentClass?: string;
+  light?: boolean;
+}) {
   const lines = headline.split("\n");
   return (
-    <h1 className="font-title shrink-0 text-4xl font-black tracking-tighter text-white sm:text-5xl">
+    <h1
+      className={
+        "font-title shrink-0 text-4xl font-black tracking-tighter sm:text-5xl " +
+        (light ? "text-[#1E2A47]" : "text-white")
+      }
+    >
       {lines[0]}
       {lines[1] && (
         <>
@@ -134,33 +185,58 @@ type RankRow = {
   value?: string;
   highlight?: boolean;
   logoUrl?: string;
+  story?: string;
 };
 
 /* ────────────────────────────────────────────────────────────
-   기본 템플릿 — 실사 + 딤 + 글래스 패널 (모든 photo-hook 본문형)
+   기본 템플릿 — 실사 + 딤(다크 네온 ↔ 파스텔 소프트) + 글래스 패널
    ──────────────────────────────────────────────────────────── */
 
 function PhotoDimEditorialSlide({ data }: { data: CardSlide }) {
+  const tone = resolveTone(data.tone, data.slideIndex ?? 0);
+  const isSoft = tone === "soft";
   const img = data.coverImage ?? pickPhotoForTopic(data.headline, "tax", undefined, data.slideIndex ?? 0);
   const bodyLines = (data.body ?? []).slice(0, 2);
 
   return (
-    <CardShell bg={<DimPhotoBg src={img} heavy />}>
+    <CardShell bg={<DimPhotoBg src={img} tone={tone} heavy={!isSoft} />} footerTone={isSoft ? "dark" : "light"}>
       <div className="flex min-h-0 flex-1 flex-col" style={{ ...cardPad(), gap: LAYOUT.gapLg }}>
-        <HeadlineBlock headline={data.headline} />
-        <div className="min-h-0 flex-1 space-y-4 overflow-hidden">
+        <HeadlineBlock
+          headline={data.headline}
+          light={isSoft}
+          accentClass={isSoft ? "text-[#4C6FE0]" : "text-[#CCFF00]"}
+        />
+        <div
+          className={
+            "min-h-0 flex-1 space-y-4 overflow-hidden " +
+            (isSoft ? "rounded-2xl bg-white/78 p-5 backdrop-blur-md" : "")
+          }
+        >
           {bodyLines.map((line, i) => (
             <div key={i} className="flex items-start gap-3">
-              <span className="font-data mt-0.5 shrink-0 text-lg font-extrabold tabular-nums text-[#CCFF00]">
+              <span
+                className={
+                  "font-data mt-0.5 shrink-0 text-lg font-extrabold tabular-nums " +
+                  (isSoft ? "text-[#4C6FE0]" : "text-[#CCFF00]")
+                }
+              >
                 {String(i + 1).padStart(2, "0")}
               </span>
-              <p className="font-body line-clamp-4 min-w-0 flex-1 text-lg font-semibold leading-relaxed text-white/95">
+              <p
+                className={
+                  "font-body line-clamp-4 min-w-0 flex-1 font-semibold leading-relaxed " +
+                  fitBodyClass(line) +
+                  " " +
+                  (isSoft ? "text-[#1E2A47]" : "text-white/95")
+                }
+              >
                 {clampText(line, 150)}
               </p>
             </div>
           ))}
         </div>
-        {data.highlight && <KeyPointPanel text={data.highlight} seed={data.headline} />}
+        {data.highlight && <HighlightLine text={data.highlight} seed={data.headline} tone={tone} />}
+        {data.characterLine && <CharacterBubble text={data.characterLine} tone={tone} />}
       </div>
     </CardShell>
   );
@@ -168,13 +244,20 @@ function PhotoDimEditorialSlide({ data }: { data: CardSlide }) {
 
 /** 실사 풀 + 딤 — 후킹 전용 (본문 없음) */
 function PhotoFullSlide({ data }: { data: CardSlide }) {
+  const tone = resolveTone(data.tone, 0);
+  const isSoft = tone === "soft";
   const img = data.coverImage ?? pickPhotoForTopic(data.headline, "story", undefined, 0);
   return (
-    <CardShell bg={<DimPhotoBg src={img} />}>
+    <CardShell bg={<DimPhotoBg src={img} tone={tone} />} footerTone={isSoft ? "dark" : "light"}>
       <div className="flex flex-1 flex-col justify-end" style={cardPad()}>
-        <HeadlineBlock headline={data.headline} />
+        <HeadlineBlock headline={data.headline} light={isSoft} accentClass={isSoft ? "text-[#4C6FE0]" : "text-[#CCFF00]"} />
         {data.subheadline && (
-          <p className="font-body mt-6 line-clamp-2 text-lg font-semibold leading-relaxed text-white/85">
+          <p
+            className={
+              "font-body mt-6 line-clamp-2 text-lg font-semibold leading-relaxed " +
+              (isSoft ? "text-[#1E2A47]/85" : "text-white/85")
+            }
+          >
             {clampText(data.subheadline, 150)}
           </p>
         )}
@@ -197,6 +280,7 @@ function Top10CardGrid({
   highlightRank?: number;
 }) {
   const lines = headline.split("\n");
+  const story = rows.find((r) => r.story)?.story;
 
   return (
     <CardShell footerTone="dark" className="bg-[#0A0A0A]">
@@ -215,6 +299,8 @@ function Top10CardGrid({
               </>
             )}
           </h1>
+          {/* TOP10 재해석 — 랭킹 비하인드 스토리 한 줄 */}
+          {story && <p className="mt-2 line-clamp-2 text-[11px] font-medium leading-snug text-white/65">{story}</p>}
         </div>
         <ul className="grid min-h-0" style={{ gridTemplateRows: `repeat(${rows.length}, minmax(0, 1fr))`, gap: 4 }}>
           {rows.map((row) => {
@@ -390,12 +476,19 @@ function HookSlide({ data }: { data: CardSlide }) {
   const dark = data.accent === "dark";
   const lines = data.headline.split("\n");
   if (data.coverImage && dark) {
+    const tone = resolveTone(data.tone, 0);
+    const isSoft = tone === "soft";
     return (
-      <CardShell bg={<DimPhotoBg src={data.coverImage} />}>
+      <CardShell bg={<DimPhotoBg src={data.coverImage} tone={tone} />} footerTone={isSoft ? "dark" : "light"}>
         <div className="flex flex-1 flex-col justify-center" style={cardPad()}>
-          <HeadlineBlock headline={data.headline} />
+          <HeadlineBlock headline={data.headline} light={isSoft} accentClass={isSoft ? "text-[#4C6FE0]" : "text-[#CCFF00]"} />
           {data.subheadline && (
-            <p className="font-body mt-6 line-clamp-2 text-lg font-semibold leading-relaxed text-white/85">
+            <p
+              className={
+                "font-body mt-6 line-clamp-2 text-lg font-semibold leading-relaxed " +
+                (isSoft ? "text-[#1E2A47]/85" : "text-white/85")
+              }
+            >
               {clampText(data.subheadline, 150)}
             </p>
           )}
@@ -404,7 +497,7 @@ function HookSlide({ data }: { data: CardSlide }) {
     );
   }
   return (
-    <CardShell footerTone={dark ? "light" : "dark"} className={dark ? "bg-[#1A2744]" : "bg-[#F5F0E6]"}>
+    <CardShell footerTone={dark ? "light" : "dark"} className={dark ? "bg-[#2B3A55]" : "bg-[#F4F0E9]"}>
       <div className="flex flex-1 flex-col justify-center" style={cardPad()}>
         <h1
           className={
@@ -416,7 +509,7 @@ function HookSlide({ data }: { data: CardSlide }) {
           {lines[1] && (
             <>
               <br />
-              <span className="text-[#CCFF00]">{lines[1]}</span>
+              <span className={dark ? "text-[#CCFF00]" : "text-[#4C6FE0]"}>{lines[1]}</span>
             </>
           )}
         </h1>
@@ -431,28 +524,46 @@ function HookSlide({ data }: { data: CardSlide }) {
 }
 
 function StorySlide({ data }: { data: CardSlide }) {
-  const dark = (data.slideIndex ?? 1) % 2 === 0;
+  const tone = resolveTone(data.tone, data.slideIndex ?? 1);
+  const isSoft = tone === "soft";
   if (data.coverImage) {
     return (
-      <CardShell bg={<DimPhotoBg src={data.coverImage} heavy />}>
+      <CardShell bg={<DimPhotoBg src={data.coverImage} tone={tone} heavy={!isSoft} />} footerTone={isSoft ? "dark" : "light"}>
         <div className="flex min-h-0 flex-1 flex-col" style={{ ...cardPad(), gap: LAYOUT.gapLg }}>
-          <h2 className="font-title text-3xl font-black tracking-tighter text-white">{data.headline}</h2>
-          <div className="min-h-0 flex-1 space-y-4 overflow-hidden">
+          <h2 className={"font-title text-3xl font-black tracking-tighter " + (isSoft ? "text-[#1E2A47]" : "text-white")}>
+            {data.headline}
+          </h2>
+          <div
+            className={
+              "min-h-0 flex-1 space-y-4 overflow-hidden " +
+              (isSoft ? "rounded-2xl bg-white/78 p-5 backdrop-blur-md" : "")
+            }
+          >
             {data.body?.map((line, i) => (
-              <p key={i} className="font-body line-clamp-3 text-lg font-semibold leading-relaxed text-white/92">
+              <p
+                key={i}
+                className={
+                  "font-body line-clamp-3 font-semibold leading-relaxed " +
+                  fitBodyClass(line) +
+                  " " +
+                  (isSoft ? "text-[#1E2A47]" : "text-white/92")
+                }
+              >
                 {clampText(line, 150)}
               </p>
             ))}
           </div>
-          {data.highlight && <KeyPointPanel text={data.highlight} seed={data.headline} />}
+          {data.highlight && <HighlightLine text={data.highlight} seed={data.headline} tone={tone} />}
+          {data.characterLine && <CharacterBubble text={data.characterLine} tone={tone} />}
         </div>
       </CardShell>
     );
   }
+  const dark = !isSoft;
   return (
-    <CardShell footerTone={dark ? "light" : "dark"} className={dark ? "bg-[#1A2744]" : "bg-white"}>
+    <CardShell footerTone={dark ? "light" : "dark"} className={dark ? "bg-[#2B3A55]" : "bg-[#FBFAF7]"}>
       <div className="flex min-h-0 flex-1 flex-col" style={{ ...cardPad(), gap: LAYOUT.gapLg }}>
-        <h2 className={"font-title text-3xl font-black tracking-tighter " + (dark ? "text-white" : "text-black")}>
+        <h2 className={"font-title text-3xl font-black tracking-tighter " + (dark ? "text-white" : "text-[#1E2A47]")}>
           {data.headline}
         </h2>
         <div className="min-h-0 flex-1 space-y-4 overflow-hidden">
@@ -460,23 +571,18 @@ function StorySlide({ data }: { data: CardSlide }) {
             <p
               key={i}
               className={
-                "font-body line-clamp-3 text-lg font-semibold leading-relaxed " + (dark ? "text-white/92" : "text-[#222]")
+                "font-body line-clamp-3 font-semibold leading-relaxed " +
+                fitBodyClass(line) +
+                " " +
+                (dark ? "text-white/92" : "text-[#333]")
               }
             >
               {clampText(line, 150)}
             </p>
           ))}
         </div>
-        {data.highlight && (
-          <div className={"mt-auto shrink-0 rounded-xl border px-5 py-4 " + (dark ? "border-white/15 bg-white/5" : "border-black/10 bg-black/[0.03]")}>
-            <p className="mb-1.5 text-[11px] font-bold tracking-wide text-[#CCFF00]">
-              {pickKeyPointLabel(data.headline)}
-            </p>
-            <p className={"font-body line-clamp-2 text-[15px] font-semibold leading-relaxed " + (dark ? "text-white" : "text-black")}>
-              {clampText(data.highlight, 150)}
-            </p>
-          </div>
-        )}
+        {data.highlight && <HighlightLine text={data.highlight} seed={data.headline} tone={dark ? "dark" : "soft"} />}
+        {data.characterLine && <CharacterBubble text={data.characterLine} tone={dark ? "dark" : "soft"} />}
       </div>
     </CardShell>
   );
@@ -485,14 +591,15 @@ function StorySlide({ data }: { data: CardSlide }) {
 function InsightSlide({ data }: { data: CardSlide }) {
   if (data.bestComment) {
     return (
-      <CardShell footerTone="dark" className="bg-[#F0EDE8]">
+      <CardShell footerTone="dark" className="bg-[#F4F0E9]">
         <div className="flex h-full flex-col justify-center" style={cardPad()}>
-          <p className="text-xs font-bold uppercase tracking-widest text-[#888]">Community</p>
-          <div className="mt-4 rounded-2xl border border-[#DDD] bg-white px-6 py-5 shadow-sm">
-            <p className="font-body line-clamp-4 text-lg font-semibold leading-relaxed text-[#111]">
+          <p className="text-xs font-bold uppercase tracking-widest text-[#4C6FE0]">Community</p>
+          <div className="mt-4 rounded-2xl border border-[#E4E0D8] bg-white/90 px-6 py-5 shadow-sm backdrop-blur-sm">
+            <p className="font-body line-clamp-4 text-lg font-semibold leading-relaxed text-[#1E2A47]">
               &ldquo;{clampText(data.bestComment, 150)}&rdquo;
             </p>
           </div>
+          <CharacterBubble text={data.characterLine ?? "오늘도 정보 챙겨가는 당신, 이미 반은 성공이에요!"} tone="soft" />
         </div>
       </CardShell>
     );

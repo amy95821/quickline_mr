@@ -104,9 +104,22 @@ export interface CardSlide {
   bestComment?: string;
   /** 무한도전식 리액션 한줄 */
   reactionLine?: string;
-  top10Items?: { rank: number; label: string; note: string; value?: string; highlight?: boolean; logoUrl?: string }[];
+  top10Items?: {
+    rank: number;
+    label: string;
+    note: string;
+    value?: string;
+    highlight?: boolean;
+    logoUrl?: string;
+    /** 랭킹 비하인드 스토리 — 1위 항목에 한 줄 재해석 */
+    story?: string;
+  }[];
   /** TOP10 하이라이트 행 (scan.real.data 스타일) */
   highlightRank?: number;
+  /** 배경 톤 — 미지정 시 slideIndex로 자동 alternation (다크 네온 ↔ 파스텔 소프트) */
+  tone?: "dark" | "soft";
+  /** 캐릭터 호스트 코멘트 (말풍선) */
+  characterLine?: string;
 }
 
 export interface GeneratedContent {

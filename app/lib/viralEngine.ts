@@ -33,15 +33,29 @@ function spiceHeadline(slide: CardSlide, blueprintId: string): CardSlide {
   return { ...slide, headline: spicy };
 }
 
+/** Closing 카드용 — 캐릭터가 남기는 따뜻한 응원 멘트 로테이션 */
+const CHEER_LINES = [
+  "오늘도 정보 챙겨가는 당신, 이미 반은 성공이에요!",
+  "무니의 픽! 이건 저장해뒀다가 꼭 다시 보세요",
+  "천천히 가도 괜찮아요, 오늘 아는 것만으로도 충분해요",
+  "다음 카드뉴스에서 또 만나요, 그때까지 화이팅!",
+];
+
+function pickCheerLine(seed: number): string {
+  return CHEER_LINES[seed % CHEER_LINES.length];
+}
+
 function injectCommentSlide(slides: CardSlide[], blueprintId: string, date: string): CardSlide[] {
   if (slides.length < 2 || slides.some((s) => s.bestComment)) return slides;
-  const humor = pickHumor(humorKey(blueprintId), hash(`${date}-${blueprintId}-humor`));
+  const seed = hash(`${date}-${blueprintId}-humor`);
+  const humor = pickHumor(humorKey(blueprintId), seed);
   return [
     ...slides,
     {
       layout: "insight",
       headline: "커뮤니티\n반응",
       bestComment: humor.bestComment,
+      characterLine: pickCheerLine(seed),
       slideIndex: slides.length + 1,
       totalSlides: slides.length + 1,
       accent: "light",

@@ -114,7 +114,7 @@ const DSR_STORY: TopicBlueprint = {
       "2040 입장에선 '타이밍'보다 '이번 달 통장'이 먼저예요.",
       "무리한 대출 매수보다 전세 안정 + 저축이 이기는 구간입니다.",
       "",
-      "👉 스와이프해서 이기는 쪽·지는 쪽 확인",
+      "스와이프해서 내가 이기는 쪽인지 지는 쪽인지 확인해보세요.",
     ].join("\n");
   },
 };
@@ -241,8 +241,8 @@ const JEONWOLSE_STORY: TopicBlueprint = {
       headline: "정답은 하나",
       subheadline: "남들 말 듣지 말 것",
       body: [
-        "전세가율 70%↑ → 전세도 부담",
-        "DSR 빠듯하면 월세+저축이 현실",
+        "전세가율이 70%를 넘어가면 사실 전세도 마냥 안전하지만은 않아요",
+        "DSR이 빠듯한 상황이라면 월세로 살면서 저축하는 게 더 현실적이에요",
       ],
       highlight: "내 통장에 맞는 쪽이 정답",
       accent: "green",
@@ -260,7 +260,7 @@ const JEONWOLSE_STORY: TopicBlueprint = {
       "전세가율 70% 넘으면 전세도 부담이에요.",
       "DSR 빠듯하면 월세 + 저축이 현실적입니다.",
       "",
-      "👉 스와이프해서 내 상황에 맞는 쪽 확인",
+      "스와이프해서 내 상황에 맞는 쪽을 확인해보세요.",
     ].join("\n"),
 };
 
@@ -354,7 +354,7 @@ const RATE_INSIGHT: TopicBlueprint = {
       supplyLabel: "한국 기준금리(%)",
       conclusion: "피크는 지났지만 '저금리 시대' 회귀는 아님 — 대출·전월세·투자 모두 금리 먼저 봐야 함",
       winnersLosers: [
-        { side: "winner", label: "변동금리 대출자", reason: "이자 부담↓" },
+        { side: "winner", label: "변동금리 대출자", reason: "이자 부담이 서서히 줄어드는 구간" },
         { side: "winner", label: "예·적금 가입자", reason: "금리 상대적 유리" },
         { side: "loser", label: "고금리 발행 채권", reason: "가격 하락" },
       ],
@@ -528,7 +528,7 @@ const DSR_POLICY_STORY: TopicBlueprint = {
       layout: "insight",
       headline: "지금 액션",
       highlight: "정책 따라 '매수'보다 '버티기'",
-      body: ["무주택·저축·전세 안정 우선", "급매수는 손해 볼 확률↑"],
+      body: ["무주택이라면 저축과 전세 안정을 우선순위에 두세요", "지금 급하게 매수하면 오히려 손해 볼 확률이 높아요"],
       accent: "green",
       slideIndex: 5,
       totalSlides: 5,
@@ -541,7 +541,7 @@ const DSR_POLICY_STORY: TopicBlueprint = {
       "전세대출 빡세지고, 갭투자는 사실상 막혀요.",
       "무주택·청약은 여전히 유리, 매수는 신중하게.",
       "",
-      "👉 스와이프해서 내 상황별 영향 확인",
+      "스와이프해서 내 상황별로 어떤 영향이 있는지 확인해보세요.",
     ].join("\n"),
 };
 
@@ -712,7 +712,7 @@ const ASSEMBLY_LAND: TopicBlueprint = {
       headline: "국토교통위 핵심",
       body: [
         "전세사기 특별법 — 피해 구제 확대·절차 단축",
-        "3기 신도시 청약 일정 — 무주택 기회↑",
+        "3기 신도시 청약 일정이 잡히면서 무주택자에게 기회가 하나 더 생겼어요",
         "DSR 3단계 — 추가 대출 어려움",
       ],
       slideIndex: 2,
@@ -724,7 +724,7 @@ const ASSEMBLY_LAND: TopicBlueprint = {
       body: [
         "전세사기 특별법 → 보증금 반환 절차 단축",
         "DSR 3단계 → 추가 대출 어려움",
-        "공급 확대 → 청약 기회↑, 기존 매물은?",
+        "공급이 늘면 청약 기회는 많아지지만, 기존 매물 가격은 어떻게 될지가 관건이에요",
       ],
       slideIndex: 3,
       totalSlides: 4,
@@ -744,7 +744,7 @@ const ASSEMBLY_LAND: TopicBlueprint = {
       "국회 부동산 법안, 2040한테 뭐가 바뀌는지 정리했어요.",
       "",
       "전세사기 특별법·DSR·공급대책 — 시행일 확인이 핵심.",
-      "👉 스와이프해서 영향 확인",
+      "스와이프해서 우리한테 어떤 영향이 있는지 확인해보세요.",
     ].join("\n"),
 };
 
@@ -775,7 +775,7 @@ const TAX_REFORM: TopicBlueprint = {
     [
       "정부 세제개편, 2040한테 뭐가 바뀌는지 정리했어요.",
       "",
-      "다주택자 부담↑, 무주택·실수요는 상대적 유리.",
+      "다주택자는 세 부담이 커지지만, 무주택·실거주자는 상대적으로 유리해지는 흐름이에요.",
       "발표 전 급매수·급매도는 시행 시점 보고 결정하세요.",
       "",
       "출처: 기재부 · 국토부 세제개편안",
